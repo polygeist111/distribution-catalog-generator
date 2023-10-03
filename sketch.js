@@ -218,6 +218,7 @@ function reStart() {
   button1.position(width * 0.5, height * 0.5);
   button1.mousePressed(startPressed);
   button1.show();
+  console.log("reStarted");
 
 }
 
