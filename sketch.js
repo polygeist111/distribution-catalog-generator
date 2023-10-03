@@ -17,7 +17,16 @@ var pdf;
 
 
 function setup() {
+  var canvas = createCanvas(400, 400);
+  canvas.parent("canvas");
+
+  button1 = createButton('Generate Sheets');
+  button1.parent("canvas");
+  button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  button1.mousePressed(startPressed);
+
   reStart();
+
 }
 
 
@@ -161,6 +170,14 @@ function draw() {
     reStart();
     //wineIndex += 5;
   }
+  if (!drawing) {
+    fill('#ED225D');
+    textSize(30);
+    textAlign(CENTER);
+  
+    text(screenY, width * 0.5, height * 0.4);
+  }
+  
 
 }
 
@@ -210,13 +227,9 @@ function reStart() {
   drawing = false;
 
   noLoop();
-  createCanvas(400, 400);
   pdf = createPDF();
 
   populateProducts("start");
-  button1 = createButton('Generate Sheets');
-  button1.position(width * 0.5, height * 0.5);
-  button1.mousePressed(startPressed);
   button1.show();
   console.log("reStarted");
 
