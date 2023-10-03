@@ -1,11 +1,10 @@
 let button1;
-let productURL = "https://api.commerce7.com/v1/product?cursor="
-let appID = "distribution-catalog-generator";
-let appSecretKey = "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0cHF1eThoeWtiS3ZGV0x2cGhaY2MyS2xBY3lnbDl0NzlKQ1ZiMTB2UDRNZERqZVBFbG8=";
+const productURL = "https://api.commerce7.com/v1/product?cursor="
+const appID = "distribution-catalog-generator";
+const ASK = "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0cHF1eThoeWtiS3ZGV0x2cGhaY2MyS2xBY3lnbDl0NzlKQ1ZiMTB2UDRNZERqZVBFbG8=";
 //generate auth header at https://www.debugbear.com/basic-auth-header-generator
-let credentials = btoa(appID + ":" + appSecretKey);
-let auth = { "Authorization" : `Basic${credentials}` };
-let page2Cursor;
+//let credentials = btoa(appID + ":" + ASK);
+//let auth = { "Authorization" : `Basic${credentials}` };
 let productList = [];
 let wineList = [];
 let allPages = [];
@@ -18,14 +17,7 @@ var pdf;
 
 
 function setup() {
-  noLoop();
-  createCanvas(400, 400);
-  pdf = createPDF();
-
-  populateProducts("start");
-  button1 = createButton('submit');
-  button1.position(200, 200);
-  button1.mousePressed(startPressed);
+  reStart();
 }
 
 
@@ -166,6 +158,7 @@ function draw() {
   if (wineIndex == wineList.length) {
     pdf.save();
     noLoop();
+    reStart();
     //wineIndex += 5;
   }
 
@@ -204,6 +197,30 @@ function pages() {
   console.log(thisWine);
   wineIndex++;
 }
+
+
+
+//Starts/restarts all processes
+function reStart() {
+  productList = [];
+  wineList = [];
+  allPages = [];
+
+  wineIndex = 0;
+  drawing = false;
+
+  noLoop();
+  createCanvas(400, 400);
+  pdf = createPDF();
+
+  populateProducts("start");
+  button1 = createButton('Generate Sheets');
+  button1.position(width * 0.5, height * 0.5);
+  button1.mousePressed(startPressed);
+  button1.show();
+
+}
+
 
 
 //SETUP FUNCTION BULK, REFERENCE, ETC.
