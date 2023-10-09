@@ -14,10 +14,14 @@ let drawing = false;
 
 var pdf;
 
+let determiningDim;
+
 
 
 function setup() {
-  var canvas = createCanvas(400, 400);
+  //var canvas = createCanvas(400, 400);
+  if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+  var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8);
   canvas.parent("canvas");
 
   button1 = createButton('Generate Sheets');
@@ -26,6 +30,16 @@ function setup() {
   button1.mousePressed(startPressed);
 
   reStart();
+
+}
+
+
+
+//Resizes canvas to fit window
+function windowResized() {
+  if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+  resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
+  button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
 
 }
 
@@ -164,7 +178,7 @@ function draw() {
   } else if (drawing && wineIndex == wineList.length - 1) {
     pages();
   }
-  if (wineIndex == wineList.length) {
+  if (wineIndex == wineList.length && wineList.length > 0) {
     pdf.save();
     noLoop();
     reStart();
@@ -298,3 +312,7 @@ function reStart() {
   //page2cursor
   return [products, newCursor]; // parses JSON response into native JavaScript objects
 } */
+
+function filterPrices(priceIn) {
+  console.log(priceIn);
+}

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>Sheets API Quickstart</title> <!--google quickstart-->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -31,8 +32,25 @@
 
   <body>
     <strong>Please make sure you're using Chrome on a laptop or desktop<br>The PDF won't generate properly in other browsers or on mobile devices</strong><br><br>
-    <script src="sketch.js"></script>
-    <div id="canvas"></div>
-  </body>
 
+    <div id="canvas">
+      <script src="sketch.js"></script>
+    </div>
+
+    <div id="authStuff">
+      <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+      <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+      <pre id="content" style="white-space: pre-wrap;"></pre>
+      <script src="googleAuth.js"></script>
+      <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+      <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    </div>
+
+    <!--<pre id="content" style="white-space: pre-wrap;"></pre>
+    <script src="googleAuth.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>-->
+    
+  </body>
+  <!--google quickstart-->
 </html>

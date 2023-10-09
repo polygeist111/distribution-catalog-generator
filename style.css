@@ -1,8 +1,8 @@
 html, body {
-  margin: 0;
+  margin: 10;
   padding: 0;
 }
 
 canvas {
-  display: block;
+  display: inline-block;
 }
