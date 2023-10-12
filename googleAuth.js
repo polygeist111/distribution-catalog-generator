@@ -89,7 +89,8 @@
           //signout_button.show();
           //authorize_button.html("Refresh");
           document.getElementById('authorize_button').innerText = 'Refresh';
-          await listMajors();
+          reStart();
+          //await getPrices();
         };
 
         if (gapi.client.getToken() === null) {
@@ -114,12 +115,13 @@
           document.getElementById('authorize_button').innerText = 'Authorize';
           //signout_button.hide();
           document.getElementById('signout_button').style.visibility = 'hidden';
+          button1.hide();
         }
       }
       
       //Print the names and majors of students in a sample spreadsheet: 
       //https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-      async function listMajors() {
+      async function getPrices() {
         let response;
         try {
           // Fetch first 10 files
@@ -146,10 +148,12 @@
         //console.log(priceResult);
         //console.log(priceResult[2][1]);
         filterPrices(priceResult);
+        /*
         const output = range.values.reduce(
             (str, row) => `${str}${row[0]}, ${row[1]}\n`,
             'SKU, Trade Price:\n');
         document.getElementById('content').innerText = output;
+        */
         //content.html(output);
 
       }

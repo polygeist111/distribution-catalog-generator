@@ -7,6 +7,7 @@ const ASK = "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0c
 //let auth = { "Authorization" : `Basic${credentials}` };
 let productList = [];
 let wineList = [];
+let pricedWineList = [];
 let allPages = [];
 
 let wineIndex = 0;
@@ -22,14 +23,16 @@ function setup() {
   //var canvas = createCanvas(400, 400);
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8);
+  
   canvas.parent("canvas");
 
   button1 = createButton('Generate Sheets');
   button1.parent("canvas");
   button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
   button1.mousePressed(startPressed);
+  button1.hide();
 
-  reStart();
+  //reStart();
 
 }
 
@@ -37,9 +40,11 @@ function setup() {
 
 //Resizes canvas to fit window
 function windowResized() {
-  if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
-  resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
-  button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  if (!drawing) {
+    if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+    resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
+    button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  }
 
 }
 
@@ -85,7 +90,8 @@ async function fetchWines(url = "") {
 //Filters productList to wineList, making sure only available wines and bundles are included
 function populateWineList() {
   productList.forEach(item => {
-    if(item.webStatus === "Available" && (item.type === "Wine" /*|| item.type === "Bundle"*/)) { append(wineList, item) } 
+    if(item.webStatus === "Available" && (item.type === "Wine" /*|| item.type === "Bundle"*/)) { 
+      append(wineList, item) } 
   });
   sortWineList();
 }
@@ -114,7 +120,17 @@ function sortWineList() {
     wineList.splice(wines.length + i, 1, bundles[i]);
   }*/
   console.log(wineList);
-  console.log(wineList.length);
+  
+  //moves winelist into 2d array with space for prices
+  for (var w = 0; w < wineList.length; w++) {
+    let toPush = [wineList[w]]
+      for (var i = 0; i < wineList[w].variants.length; i++) {
+        toPush.push("");
+    }
+    pricedWineList.push(toPush);
+  }
+  console.log(pricedWineList);
+  if (document.getElementById('authorize_button').innerText == "Refresh") { getPrices(); }
   loop();
 
 }
@@ -160,9 +176,12 @@ function wineName(wine) {
 
 //Handles start button input
 function startPressed() {
+  canvas = resizeCanvas(816, 1054);
+
   drawing = true;
   pdf.beginRecord();
   button1.hide();
+
 
 }
 
@@ -182,14 +201,17 @@ function draw() {
     pdf.save();
     noLoop();
     reStart();
-    //wineIndex += 5;
+
   }
   if (!drawing) {
     fill('#ED225D');
     textSize(30);
     textAlign(CENTER);
-  
-    text(screenY, width * 0.5, height * 0.4);
+    if (document.getElementById('authorize_button').innerText == "Refresh") { 
+      text("Press the button to continue", width * 0.5, height * 0.4);
+    } else {
+      text("Please sign in to Google to continue", width * 0.5, height * 0.4);
+    }
   }
   
 
@@ -197,15 +219,21 @@ function draw() {
 
 
 
-//Iterates through wineList to create product pages (requires Nicole's designs)
+//Iterates through wineList to create product pages (requires Nicole's designs) - consider special case for multiple variants
 function pages() {
   var thisWine = wineList[wineIndex];
   fill('#ED225D');
   textSize(30);
   textAlign(CENTER);
   
-  text(justMakerName(thisWine), width * 0.5, height * 0.4);
-  text(wineIndex, width * 0.5, height * 0.6);
+  text(justMakerName(thisWine), width * 0.5, height * 0.3);
+  text(wineIndex, width * 0.5, height * 0.5);
+  let price = "";
+  for (var i = 0; i < pricedWineList[wineIndex].length - 1; i++) {
+    price += " | " + pricedWineList[wineIndex][i + 1];
+  }
+  price = price.substring(3);
+  text(price, width * 0.5, height * 0.7);
   //https://github.com/zenozeng/p5.js-pdf/releases/tag/v0.3.0
   //currently unused, adapt to fit with pdf generator
   //button1.hide()
@@ -225,7 +253,7 @@ function pages() {
   for (let page = 0; page < allPages.length; page++) {
     save(allPages[page], modelName + "_instructions_" + page + ".png");
   }*/
-  console.log(thisWine);
+  console.log(wineIndex);
   wineIndex++;
 }
 
@@ -235,84 +263,62 @@ function pages() {
 function reStart() {
   productList = [];
   wineList = [];
+  pricedWineList = [];
   allPages = [];
 
   wineIndex = 0;
   drawing = false;
 
+  canvas = resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
+
   noLoop();
   pdf = createPDF();
 
   populateProducts("start");
-  button1.show();
+  button1.hide();
   console.log("reStarted");
 
 }
 
 
 
-//SETUP FUNCTION BULK, REFERENCE, ETC.
-//fetchAuth();
-  //apiTest(productURL, {headers : auth, tenantID : "archetyp"})
-  //console.log(apiTest(productURL));
-  //var products = apiTest(productURL);
-  //console.log(products);
-  /*
-  apiTest(productURL + cursor)
-  .then(m => { 
-    m[0].forEach(item => append(wineList, item));
-    cursor = m[1];
-    console.log(wineList);
-    console.log(cursor);
-    console.log(apiTest(productURL + cursor));
-    console.log(wineList);
-  })
-  .catch(e => { console.log(e) });*/
-  //populateProducts(cursor);
-  
-  //const answer1 = apiTest(productURL)
-  //.then(r => { console.log(r) });
-  
-  //const getTitles = (data) => data.map(({ title }) => title);
-  //console.log(getTitles(answer));
-  /* EXAMPLE JSON PARSING
-  const genresArray= [28, 18, 53];
-  const movie_genres_url = {"genres":[{"id":28,"name":"Action"},{"id":12,"name":"Adventure"}]}
+//Wipes all read data
+function wipeOut() {
+  productList = [];
+  wineList = [];
+  pricedWineList = [];
+  allPages = [];
 
-  //const getMacthedElements = (data, filterBy) => data.filter(({ id }) => filterBy.includes(id)).map(({ name }) => name);
-  const getMacthedElements = (data) => data.map(({ name }) => name);
+  wineIndex = 0;
+  drawing = false;
 
-  console.log(getMacthedElements(movie_genres_url.genres, genresArray));
-  console.log(getMacthedElements(movie_genres_url.genres, genresArray)[0]);
-  console.log(getMacthedElements(movie_genres_url.genres, genresArray)[1]);
-  */
+  noLoop();
 
-  //FETCH FULL EXAMPLE
-  /*async function apiTest(url = "") {
-  // Default options are marked with *
-  const response = await fetch(url, {
-    //method: "GET", // *GET, POST, PUT, DELETE, etc.
-    //mode: "cors", // no-cors, *cors, same-origin
-    //cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-    //credentials: "omit", // include, *same-origin, omit
-    headers: {
-      "Content-Type": "application/json",
-      //"Authorization": `Basic${btoa(appID + ":" + appSecretKey)}`,
-      "Authorization": "Basic Y2F0YWxvZy1nZW5lcmF0b3ItaW50ZWdyYXRpb24tdGVzdDpoS00wN01LcHE0aHVhZ2tMRHVrQ3FjRnU1R1FBTWVORUM2dWVpRU1ma09EdGQwUmFhNVYxZWlQRVhCaWtESDM5",
-      //"tenantID": `Basic${btoa("tenant:archetyp")}`,
-      "Tenant": "archetyp",
-    },
-    //redirect: "follow", // manual, *follow, error
-    //referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    //body: JSON.stringify(data), // body data type must match "Content-Type" header
-  });
-  const parsedJSON = await response.json();
-  const newCursor = await parsedJSON.cursor;
-  const products = await parsedJSON.products;
-  //page2cursor
-  return [products, newCursor]; // parses JSON response into native JavaScript objects
-} */
+  button1.hide();
+}
 
+
+
+//Applies trade prices (for all variants) to their correct places in pricedWineList array, automatically skips over unavailable wines. 
+//Trade price sheet must be correctly sorted and have accurate SKUs
 function filterPrices(priceIn) {
   console.log(priceIn);
+  var winDex = 0;
+  //iterates across pricedWineList
+  for (var i = 0; i < pricedWineList.length; i++) {
+    //iterates through each variant for a given entry in pricedWineList
+    for (var s = 0; s < pricedWineList[i][0].variants.length; s++) {
+      //Skips past nonmatching entries
+      while (priceIn[winDex][0] != (pricedWineList[i][0].variants[s].sku)) {
+        winDex++;
+      }
+      //appends price to correct array slot for given wine in pricedWineList
+      if (priceIn[winDex][0] == (pricedWineList[i][0].variants[s].sku)) {
+        pricedWineList[i][1 + s] = priceIn[winDex][1];
+        winDex++
+      }
+    }
+  }
+  console.log(pricedWineList);
+  button1.show();
 }
