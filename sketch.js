@@ -9,6 +9,7 @@ let productList = [];
 let wineList = [];
 let pricedWineList = [];
 let allPages = [];
+let allImages = [];
 
 let wineIndex = 0;
 let drawing = false;
@@ -17,7 +18,24 @@ var pdf;
 
 let determiningDim;
 
+let ArchBlue = '#2B3475';
+let white = '#FFFFFF';
 
+let imgWidth = 170;
+let imgHeight = 691;
+
+let testFont;
+//let pageCount = 0;
+
+/*
+
+Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 by 1056)
+
+*/
+
+function preload() {
+  testFont = loadFont('inconsolata.otf');
+}
 
 function setup() {
   //var canvas = createCanvas(400, 400);
@@ -33,7 +51,7 @@ function setup() {
   button1.hide();
 
   //reStart();
-
+  textFont(testFont);
 }
 
 
@@ -124,7 +142,7 @@ function sortWineList() {
   //moves winelist into 2d array with space for prices
   for (var w = 0; w < wineList.length; w++) {
     let toPush = [wineList[w]]
-      for (var i = 0; i < wineList[w].variants.length; i++) {
+      for (var i = 0; i <= wineList[w].variants.length; i++) {
         toPush.push("");
     }
     pricedWineList.push(toPush);
@@ -132,7 +150,6 @@ function sortWineList() {
   console.log(pricedWineList);
   if (document.getElementById('authorize_button').innerText == "Refresh") { getPrices(); }
   loop();
-
 }
 
 
@@ -176,7 +193,8 @@ function wineName(wine) {
 
 //Handles start button input
 function startPressed() {
-  canvas = resizeCanvas(816, 1054);
+  fill(white);
+  canvas = resizeCanvas(816, 1056);
 
   drawing = true;
   pdf.beginRecord();
@@ -219,21 +237,29 @@ function draw() {
 
 
 
+//converts price(s) into formatted string with dividers as needed
+function formatPrice(thisWine) {
+  let price = "";
+  for (var i = 2; i < thisWine.length; i++) {
+    price += " | " + thisWine[i];
+  }
+  price = price.substring(3);
+  return price;
+}
+
+
+
 //Iterates through wineList to create product pages (requires Nicole's designs) - consider special case for multiple variants
 function pages() {
-  var thisWine = wineList[wineIndex];
+  var thisWine = pricedWineList[wineIndex];
   fill('#ED225D');
   textSize(30);
   textAlign(CENTER);
   
-  text(justMakerName(thisWine), width * 0.5, height * 0.3);
+  text(justMakerName(thisWine[0]), width * 0.5, height * 0.3);
   text(wineIndex, width * 0.5, height * 0.5);
-  let price = "";
-  for (var i = 0; i < pricedWineList[wineIndex].length - 1; i++) {
-    price += " | " + pricedWineList[wineIndex][i + 1];
-  }
-  price = price.substring(3);
-  text(price, width * 0.5, height * 0.7);
+  
+  text(formatPrice(thisWine), width * 0.5, height * 0.7);
   //https://github.com/zenozeng/p5.js-pdf/releases/tag/v0.3.0
   //currently unused, adapt to fit with pdf generator
   //button1.hide()
@@ -253,6 +279,10 @@ function pages() {
   for (let page = 0; page < allPages.length; page++) {
     save(allPages[page], modelName + "_instructions_" + page + ".png");
   }*/
+
+  header(thisWine);
+  footer();
+
   console.log(wineIndex);
   wineIndex++;
 }
@@ -265,6 +295,7 @@ function reStart() {
   wineList = [];
   pricedWineList = [];
   allPages = [];
+  allImages = [];
 
   wineIndex = 0;
   drawing = false;
@@ -314,11 +345,93 @@ function filterPrices(priceIn) {
       }
       //appends price to correct array slot for given wine in pricedWineList
       if (priceIn[winDex][0] == (pricedWineList[i][0].variants[s].sku)) {
-        pricedWineList[i][1 + s] = priceIn[winDex][1];
+        pricedWineList[i][2 + s] = priceIn[winDex][1];
         winDex++
       }
     }
   }
+  loadImages();
+}
+
+
+
+//Loads all wine images into an array
+function loadImages() {
+  for (var i = 0; i < pricedWineList.length; i++) {
+    pricedWineList[i][1] = loadImage(pricedWineList[i][0].image);
+  }
   console.log(pricedWineList);
   button1.show();
+  
+}
+
+
+
+/*
+*
+* End of Logic Section, Beginning of Renderer (multiply all dims by 1.02)
+*
+*/
+
+
+
+//Generates header
+function header(thisWine) {
+  //header
+  fill(ArchBlue);
+  rect(0, 0, 816, 244);
+  
+  fill(white);
+  textAlign(LEFT);
+  //textFont("Brandon Grotesque", 24);
+  textSize(24);
+  let thisVintage = thisWine[0].wine.vintage;
+  if (thisVintage == null) { thisVintage = ""; }
+  text(thisVintage, 62, 84);
+  text(makerName(thisWine[0].title), 62, 135);
+  textSize(16);
+  textStyle(ITALIC);
+  text(thisWine[0].subTitle, 62, 175);
+
+  textStyle(NORMAL);
+
+  //Resizes and renders image (170 max width, 691 max height)
+  let img = thisWine[1];
+  //width based resize
+  let conversionRatio = imgWidth / img.width;
+  img.width = imgWidth;
+  img.height *= conversionRatio;
+  //height based resize
+  if (img.height > imgHeight) {
+    conversionRatio = imgHeight / img.height;
+    img.width *= conversionRatio;
+    img.height = imgHeight;
+  }
+  //62,96
+  image(img, 96 + (imgWidth - img.width), 280);
+
+
+  
+}
+
+
+
+//Generates footer
+function footer() {
+  let pageNum = pdf.elements.length / 2 + 1;
+  console.log("Page num: " + pageNum);
+
+  //divider line
+  fill(ArchBlue);
+  stroke(ArchBlue);
+  line(60, 1000, 756, 1000)
+  noStroke();
+
+  //footer text
+  textSize(8);
+  textAlign(RIGHT);
+  text(pageNum, 756, 1016);
+  textAlign(LEFT);
+  text("Archetyp Catalog " + year(), 60, 1016);
+
 }
