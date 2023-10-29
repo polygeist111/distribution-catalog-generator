@@ -10,6 +10,9 @@ let wineList = [];
 let pricedWineList = [];
 let allPages = [];
 let allImages = [];
+let frontMatter = [];
+let makerMatter = [];
+let backMatter = [];
 
 let wineIndex = 0;
 let drawing = false;
@@ -31,6 +34,13 @@ let italFont;
 
 let bodyMargin = 20;
 
+let definitiveLength = 0;
+let printIndex = 0;
+let lastMaker = "";
+let makerIndex = 0;
+let backIndex = 0;
+let allDone = false;
+
 //let pageCount = 0;
 
 /*
@@ -45,10 +55,37 @@ function preload() {
   boldFont = loadFont('Fonts\\Brandon-Grotesque-Bold.otf');
   italFont = loadFont('Fonts\\Brandon-Grotesque-Regular-Italic.otf');
 
+  //loads front matter
+  for (var i = 0; i < 3; i++) {
+    var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
+    frontMatter.push(toPush);
+  }
+  //console.log(frontMatter);
+
+  //loads mid matter (maker profiles)
+  for (var i = 0; i < 23; i++) {
+    var toPush = (loadImage('InsertedCopy\\MakerMatter_Fall_' + (i + 1) + '.png'));
+    makerMatter.push(toPush);
+  }
+  //console.log(makerMatter);
+
+  //loads back matter
+  for (var i = 0; i < 8; i++) {
+    var toPush = (loadImage('InsertedCopy\\BackMatter_Fall_' + (i + 1) + '.png'));
+    backMatter.push(toPush);
+  }
+  //console.log(backMatter);
+
 }
 
 function setup() {
-  //var canvas = createCanvas(400, 400);
+
+  frontMatter.splice(0, 3);
+  makerMatter.splice(0, 23);
+  backMatter.splice(0, 8);
+  //console.log(frontMatter);
+  //console.log(makerMatter);
+  //console.log(backMatter);
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8);
   
@@ -220,6 +257,7 @@ function startPressed() {
 function draw() {
   background(white);
   
+  /*
   if (drawing && wineIndex < wineList.length - 1) {
     pages();
     pdf.nextPage();
@@ -232,6 +270,72 @@ function draw() {
     reStart();
 
   }
+  */
+  //console.log(pricedWineList[wineIndex + 1][0]);
+  //console.log(lastMaker);
+  let img;
+  if (drawing && printIndex < definitiveLength - 1 && !allDone) {
+    //front matter
+    if (printIndex < frontMatter.length) {
+      img = frontMatter[printIndex];
+      img = resizeToPrint(img);
+      image(img, 0, 0);
+      pdf.nextPage();
+
+      printIndex++;
+      console.log("front page " + printIndex);
+      //maker matter
+    } else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
+      lastMaker = justMakerName(pricedWineList[wineIndex][0]);
+      img = makerMatter[makerIndex];
+      img = resizeToPrint(img);
+      image(img, 0, 0);
+      pdf.nextPage();
+
+      makerIndex++;
+      printIndex++;
+      console.log("maker page " + printIndex);
+      //back matter
+    } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
+      img = backMatter[backIndex];
+      img = resizeToPrint(img);
+      image(img, 0, 0);
+      pdf.nextPage();
+
+      backIndex++;
+      printIndex++;
+      console.log("back page " + printIndex);
+      //tech sheets
+    } else if (wineIndex < pricedWineList.length) {
+      pages();
+      pdf.nextPage();
+      console.log("tech sheet page " + printIndex);
+    }
+
+    //last back matter / last page
+  } 
+  
+  if (drawing && backIndex == backMatter.length - 1) {
+    img = backMatter[backIndex];
+    img = resizeToPrint(img);
+    image(img, 0, 0);
+    
+    backIndex++;
+    printIndex++;
+    allDone = true;
+  }
+  
+  //Closing save (after last page)
+  if (allDone) {
+    pdf.save();
+    noLoop();
+    allDone = false
+    reStart();
+
+  }
+
+
+
   if (!drawing) {
     fill('#ED225D');
     textSize(30);
@@ -303,6 +407,7 @@ function pages() {
 
   console.log(wineIndex);
   wineIndex++;
+  printIndex++;
 
 }
 
@@ -328,6 +433,13 @@ function reStart() {
   button1.hide();
   console.log("reStarted");
 
+  definitiveLength = 0;
+  printIndex = 0;
+  lastMaker = "";
+  makerIndex = 0;
+  backIndex = 0;
+  allDone = false;
+
 }
 
 
@@ -346,6 +458,12 @@ function wipeOut() {
 
   button1.hide();
 
+  definitiveLength = 0;
+  printIndex = 0;
+  lastMaker = "";
+  makerIndex = 0;
+  backIndex = 0;
+  allDone = false;
 }
 
 
@@ -388,7 +506,12 @@ function loadImages() {
     pricedWineList[i][1] = loadImage(pricedWineList[i][0].image);
   }
   console.log(pricedWineList);
-  button1.show();
+
+  //Shows start button after a short delay to give photos loading time
+  definitiveLength = pricedWineList.length + frontMatter.length + makerMatter.length + backMatter.length;
+  console.log("Definitive Length: " + definitiveLength);
+
+  setTimeout(function() { button1.show(); }, 2000);
   
 }
 
@@ -703,4 +826,13 @@ function textHeight(text, maxWidth) {
   }
 
   return h;
+}
+
+
+
+//Resizes image to print window dimensions (816 x 1056)
+function resizeToPrint(imgIn) {
+  imgIn.width = 816;
+  imgIn.height = 1056;
+  return imgIn;
 }
