@@ -34,7 +34,7 @@ Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 b
 */
 
 function preload() {
-  testFont = loadFont('inconsolata.otf');
+  testFont = loadFont('MoonlessSC-Regular (1).otf');
 }
 
 function setup() {
@@ -52,6 +52,7 @@ function setup() {
 
   //reStart();
   textFont(testFont);
+  noStroke();
 }
 
 
