@@ -25,6 +25,12 @@ let imgWidth = 170;
 let imgHeight = 691;
 
 let testFont;
+let regFont;
+let boldFont;
+let italFont;
+
+let bodyMargin = 20;
+
 //let pageCount = 0;
 
 /*
@@ -34,7 +40,11 @@ Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 b
 */
 
 function preload() {
-  testFont = loadFont('MoonlessSC-Regular (1).otf');
+  testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
+  regFont = loadFont('Fonts\\Brandon-Grotesque-Regular.otf');
+  boldFont = loadFont('Fonts\\Brandon-Grotesque-Bold.otf');
+  italFont = loadFont('Fonts\\Brandon-Grotesque-Regular-Italic.otf');
+
 }
 
 function setup() {
@@ -51,7 +61,7 @@ function setup() {
   button1.hide();
 
   //reStart();
-  textFont(testFont);
+  textFont(regFont);
   noStroke();
 }
 
@@ -208,7 +218,7 @@ function startPressed() {
 
 //Draws to canvas, snaps and saves all product pages
 function draw() {
-  background(220);
+  background(white);
   
   if (drawing && wineIndex < wineList.length - 1) {
     pages();
@@ -233,7 +243,6 @@ function draw() {
     }
   }
   
-
 }
 
 
@@ -246,6 +255,7 @@ function formatPrice(thisWine) {
   }
   price = price.substring(3);
   return price;
+
 }
 
 
@@ -257,10 +267,10 @@ function pages() {
   textSize(30);
   textAlign(CENTER);
   
-  text(justMakerName(thisWine[0]), width * 0.5, height * 0.3);
-  text(wineIndex, width * 0.5, height * 0.5);
+  //text(justMakerName(thisWine[0]), width * 0.5, height * 0.3);
+  //text(wineIndex, width * 0.5, height * 0.5);
   
-  text(formatPrice(thisWine), width * 0.5, height * 0.7);
+  //text(formatPrice(thisWine), width * 0.5, height * 0.7);
   //https://github.com/zenozeng/p5.js-pdf/releases/tag/v0.3.0
   //currently unused, adapt to fit with pdf generator
   //button1.hide()
@@ -282,10 +292,18 @@ function pages() {
   }*/
 
   header(thisWine);
+
+  bottleShot(thisWine);
+
+  priceBox(thisWine);
+
+  writeBody(thisWine[0]);
+
   footer();
 
   console.log(wineIndex);
   wineIndex++;
+
 }
 
 
@@ -327,6 +345,7 @@ function wipeOut() {
   noLoop();
 
   button1.hide();
+
 }
 
 
@@ -352,6 +371,13 @@ function filterPrices(priceIn) {
     }
   }
   loadImages();
+  
+  /* prints html description box
+  let p = createP(pricedWineList[0][0].content);
+      p.style('font-size', '16px');
+      p.position(420, 300);
+  */
+  //parseHTMLText(pricedWineList[0][0].content);
 }
 
 
@@ -385,18 +411,24 @@ function header(thisWine) {
   fill(white);
   textAlign(LEFT);
   //textFont("Brandon Grotesque", 24);
-  textSize(24);
+  textFont(boldFont, 28);
   let thisVintage = thisWine[0].wine.vintage;
   if (thisVintage == null) { thisVintage = ""; }
   text(thisVintage, 62, 84);
   text(makerName(thisWine[0].title), 62, 135);
-  textSize(16);
-  textStyle(ITALIC);
+  textFont(italFont, 20);
   text(thisWine[0].subTitle, 62, 175);
+  textFont(regFont);
 
   textStyle(NORMAL);
+  
+}
 
-  //Resizes and renders image (170 max width, 691 max height)
+
+
+//Generates bottle shot
+function bottleShot(thisWine) {
+//Resizes and renders image (170 max width, 691 max height)
   let img = thisWine[1];
   //width based resize
   let conversionRatio = imgWidth / img.width;
@@ -409,10 +441,69 @@ function header(thisWine) {
     img.height = imgHeight;
   }
   //62,96
-  image(img, 96 + (imgWidth - img.width), 280);
+  image(img, 110 + (imgWidth - img.width), 280);
+
+}
 
 
+
+//Generates body text
+function writeBody(thisWine) {
+  let left = 420;
+  let top = 275;
+  let lastBox = null;
+  let maxWidth = 336;
+  let maxHeight = 600;
+  let thisHeight;
+  let totalHeight = 0;
   
+  let thisContent = parseHTMLText(thisWine.content);
+  let key = "";
+  let spacer = "";
+  let value = "";
+  
+  textSize(14.5);
+  textFont(regFont);
+  let spaceSize = textWidth(" ");
+  /*
+  textFont(boldFont);
+  console.log(textWidth(thisContent[0].substring(0, thisContent[0].indexOf(":") + 1)));
+  textFont(regFont);
+  console.log(textWidth(thisContent[0].substring(0, thisContent[0].indexOf(":") + 1)));
+  console.log(textWidth(" "));
+  console.log(thisContent.length);
+  */
+  for (var i = 0; i < thisContent.length; i++) {
+
+    //sets text block height
+    if (lastBox == null) {
+      thisHeight = top;
+    } else { 
+      thisHeight = textHeight(value, maxWidth) + 10;
+      console.log(thisHeight);
+    }
+    totalHeight += thisHeight;
+
+    //assigns key, value, and spacer
+    textFont(boldFont);
+    key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
+    spacer = "";
+    spacerConstant = Math.round(textWidth(thisContent[i].substring(0, thisContent[i].indexOf(":") + 1) + 1) / spaceSize);
+    for (var k = 0; k < spacerConstant; k++) {
+      spacer += " ";
+    }
+    value = spacer + thisContent[i].substring(thisContent[i].indexOf(":") + 1);
+
+    //Prints descriptive text
+    textFont(boldFont);
+    //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
+    text(key, left, totalHeight, maxWidth, maxHeight);
+    
+    textFont(regFont);
+    //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
+    lastBox = text(value, left, totalHeight, maxWidth, maxHeight);
+  }
+
 }
 
 
@@ -429,10 +520,187 @@ function footer() {
   noStroke();
 
   //footer text
-  textSize(8);
+  textFont(regFont, 12);
   textAlign(RIGHT);
-  text(pageNum, 756, 1016);
+  text(pageNum, 756, 1010);
   textAlign(LEFT);
-  text("Archetyp Catalog " + year(), 60, 1016);
+  text("Archetyp Catalog " + year(), 60, 1010);
 
+}
+
+
+
+//Generates price box
+function priceBox(thisWine) {
+  //price box
+  strokeWeight(2);
+  stroke(ArchBlue);
+  rect(420, 916, 336, 52);
+
+  //priceText
+  noStroke();
+  fill(ArchBlue);
+  textFont(boldFont, 22);
+  textAlign(CENTER, CENTER);
+  text(formatPrice(thisWine), 588, 942);
+  textAlign(LEFT, TOP);
+}
+
+
+
+//Converts c7 api wine content box into an array of readable text
+function parseHTMLText(textIn) {
+  let current = textIn;
+  let result = [];
+  let thisLine = "";
+
+  while(current.length > 0) {
+    //checks for new line
+    //console.log("first four: " + current.substring(0,4));
+    if (current.substring(0, 3) == "<p>") {
+      current = current.substring(3);
+    }
+    if (current.substring(1, 4) == "<p>") {
+
+      thisLine = handleSpecialCharacters(thisLine);
+      result.push(thisLine);
+      thisLine = "";
+      current = current.substring(4);
+    }
+
+    //checks for/removes bracketed traits
+    while (current.substring(0, 1) == "<") {
+      current = current.substring(current.indexOf(">") + 1);
+      //console.log(current)
+    }
+    //adds plain text to thisLine
+    thisLine += current.substring(0, current.indexOf("<"));
+    current = current.substring(current.indexOf("<"));
+    //console.log(thisLine);
+
+    //checks for/removes bracketed traits
+    while (current.substring(0, 1) == "<" && current.substring(0, 3) != "<p>") {
+      current = current.substring(current.indexOf(">") + 1);
+      //console.log(current);
+    }
+  }
+  thisLine = handleSpecialCharacters(thisLine);
+  result.push(thisLine);
+
+  console.log(result);
+  return result;
+
+}
+
+
+
+//Handles special html characters
+function handleSpecialCharacters(textIn) {
+  //Spare spaces
+  while (textIn.indexOf("&nbsp;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&nbsp;")) + textIn.substring(textIn.indexOf("&nbsp;") + 6);
+  }
+
+  //U umlauts
+  while (textIn.indexOf("&uuml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&uuml;")) + "ü" + textIn.substring(textIn.indexOf("&uuml;") + 6);
+  }
+
+  //Left quotation
+  while (textIn.indexOf("&ldquo;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&ldquo;")) + "\"" + textIn.substring(textIn.indexOf("&ldquo;") + 7);
+  }
+
+  //Right quotation
+  while (textIn.indexOf("&rdquo;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&rdquo;")) + "\"" + textIn.substring(textIn.indexOf("&rdquo;") + 7);
+  }
+
+  //Raised tone e
+  while (textIn.indexOf("&eacute;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&eacute;")) + "é" + textIn.substring(textIn.indexOf("&eacute;") + 8);
+  }
+
+  //N dash
+  while (textIn.indexOf("&ndash;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&ndash;")) + "–" + textIn.substring(textIn.indexOf("&ndash;") + 7);
+  }
+
+  //Apostrophe
+  while (textIn.indexOf("&rsquo;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&rsquo;")) + "\'" + textIn.substring(textIn.indexOf("&rsquo;") + 7);
+  }
+
+  //Degree symbol
+  while (textIn.indexOf("&deg;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&deg;")) + "°" + textIn.substring(textIn.indexOf("&deg;") + 5);
+  }
+
+  //o umlauts
+  while (textIn.indexOf("&ouml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&ouml;")) + "ö" + textIn.substring(textIn.indexOf("&ouml;") + 6);
+  }
+
+  //a umlauts
+  while (textIn.indexOf("&auml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&auml;")) + "ä" + textIn.substring(textIn.indexOf("&auml;") + 6);
+  }
+
+  //fractional 1/2
+  while (textIn.indexOf("&frac12;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&frac12;")) + "½" + textIn.substring(textIn.indexOf("&frac12;") + 6);
+  }
+
+  //O umlauts
+  while (textIn.indexOf("&Ouml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Ouml;")) + "Ö" + textIn.substring(textIn.indexOf("&Ouml;") + 6);
+  }
+
+  //A umlauts
+  while (textIn.indexOf("&Auml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Auml;")) + "Ä" + textIn.substring(textIn.indexOf("&Auml;") + 6);
+  }
+
+  //U umlauts
+  while (textIn.indexOf("&Uuml;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Uuml;")) + "Ü" + textIn.substring(textIn.indexOf("&Uuml;") + 6);
+  }
+
+  //Sharp S
+  while (textIn.indexOf("&#223;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&#223;")) + "ß" + textIn.substring(textIn.indexOf("&#223;") + 6);
+  }
+
+  //Ampersand
+  while (textIn.indexOf("&amp;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&amp;")) + "&" + textIn.substring(textIn.indexOf("&amp;") + 5);
+  }
+  
+  return textIn;
+}
+
+
+
+//Gets height of box given text and max width
+//Borrowed from studioijeoma https://gist.github.com/studioijeoma/942ced6a9c24a4739199
+function textHeight(text, maxWidth) {
+  var words = text.split(' ');
+  var line = '';
+  var h = this._textLeading;
+
+  for (var i = 0; i < words.length; i++) {
+      var testLine = line + words[i] + ' ';
+      //var testWidth = drawingContext.measureText(testLine).width;
+      var testWidth = textWidth(testLine);
+
+      if (testWidth > maxWidth && i > 0) {
+          line = words[i] + ' ';
+          h += this._textLeading;
+      } else {
+          line = testLine;
+      }
+      //console.log(line);
+  }
+
+  return h;
 }

@@ -6,3 +6,7 @@ html, body {
 canvas {
   display: inline-block;
 }
+
+#authStuff{ 
+  margin-top: 10px; 
+}
