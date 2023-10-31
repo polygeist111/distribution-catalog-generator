@@ -576,7 +576,7 @@ function bottleShot(thisWine) {
     img.height = imgHeight;
   }
   //62,96
-  image(img, 110 + (imgWidth - img.width), 280);
+  image(img, 210 - img.width / 2, 280);
 
 }
 
