@@ -13,6 +13,7 @@ let allImages = [];
 let frontMatter = [];
 let makerMatter = [];
 let backMatter = [];
+let makers = [];
 
 let wineIndex = 0;
 let drawing = false;
@@ -41,6 +42,11 @@ let makerIndex = 0;
 let backIndex = 0;
 let allDone = false;
 
+let tester;
+
+
+
+
 //let pageCount = 0;
 
 /*
@@ -49,37 +55,18 @@ Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 b
 
 */
 
+
 function preload() {
   testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
   regFont = loadFont('Fonts\\Brandon-Grotesque-Regular.otf');
   boldFont = loadFont('Fonts\\Brandon-Grotesque-Bold.otf');
   italFont = loadFont('Fonts\\Brandon-Grotesque-Regular-Italic.otf');
 
-  //console.log(readDirectory(FileSystem.getDirectory('InsertedCopy')));
-  //loads front matter
-  for (var i = 0; i < 3; i++) {
-    var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
-    frontMatter.push(toPush);
-  }
-  console.log(frontMatter);
-
-  //loads mid matter (maker profiles)
-  for (var i = 0; i < 23; i++) {
-    var toPush = (loadImage('InsertedCopy\\MakerMatter_Fall_' + (i + 1) + '.png'));
-    makerMatter.push(toPush);
-  }
-  //console.log(makerMatter);
-
-  //loads back matter
-  for (var i = 0; i < 8; i++) {
-    var toPush = (loadImage('InsertedCopy\\BackMatter_Fall_' + (i + 1) + '.png'));
-    backMatter.push(toPush);
-  }
-  //console.log(backMatter);
-
 }
 
 function setup() {
+
+  //readDir('InsertedCopy');
 
   frontMatter.splice(0, 3);
   makerMatter.splice(0, 23);
@@ -197,6 +184,7 @@ function sortWineList() {
     pricedWineList.push(toPush);
   }
   console.log(pricedWineList);
+  getMakers();
   if (document.getElementById('authorize_button').innerText == "Refresh") { getPrices(); }
   loop();
 }
@@ -216,13 +204,13 @@ function makerName(name) {
 //Returns only actual maker name, no wine name
 function justMakerName(wineIn) {
   let name = wineIn.title
-  let makeName;
+  let makeName = makerName(name);
   let bottleName;
-  if (name.substring(0,1) === "2") {
-    makeName = name.substring(5);
-  } else makeName = name;
+  
   bottleName = wineName(wineIn);
-  return makeName.substring(0, makeName.length - bottleName.length);
+  let result =  makeName.substring(0, makeName.length - bottleName.length - 1);
+  //if (!makers.includes(result)) { makers.push(result); console.log("hi"); } else { console.log("bye"); }
+  return result;
 
 }
 
@@ -234,6 +222,9 @@ function wineName(wine) {
   if (wine.vendor != null) {
     makerNameSpace = wine.vendor.title.length;
   } else return name;
+  if (wine.vendor.title == "Vinodea / Andrea Schenter") {
+    makerNameSpace = 7;
+  }
   return name.substring(makerNameSpace + 1);
 
 }
@@ -537,7 +528,7 @@ function loadImages() {
   console.log(pricedWineList);
 
   //Shows start button after a short delay to give photos loading time
-  definitiveLength = pricedWineList.length + frontMatter.length + makerMatter.length + backMatter.length;
+  definitiveLength = pricedWineList.length + frontMatter.length + makers.length + backMatter.length;
   console.log("Definitive Length: " + definitiveLength);
 
   setTimeout(function() { button1.show(); }, 2000);
@@ -890,5 +881,52 @@ function readDirectory(directory) {
 
   getEntries();
   return entries;
+
+}
+
+
+
+//Loads inserted pages
+function loadMatter() {
+  //console.log(readDirectory(FileSystem.getDirectory('InsertedCopy')));
+  //loads front matter
+  for (var i = 0; i < 3; i++) {
+    var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
+    frontMatter.push(toPush);
+  }
+  console.log(frontMatter);
+  console.log
+  //loads mid matter (maker profiles)
+  for (var i = 0; i < makers.length; i++) {
+    var toPush = (loadImage('InsertedCopy\\MakerMatter_Fall_' + makers[i] + '.png'));
+    makerMatter.push(toPush);
+  }
+  console.log(makerMatter);
+
+  //loads back matter
+  for (var i = 0; i < 8; i++) {
+    var toPush = (loadImage('InsertedCopy\\BackMatter_Fall_' + (i + 1) + '.png'));
+    backMatter.push(toPush);
+  }
+  console.log(backMatter);
+
+}
+
+
+
+//Gets list of all makers in the catalogue
+function getMakers() {
+  for (const i of pricedWineList) {
+    //console.log(justMakerName(i[0]));
+    if (!makers.includes(justMakerName(i[0]))) { makers.push(justMakerName(i[0])); }
+  }
+  for (var i = 0; i < makers.length; i++) {
+    while(makers[i].indexOf(" ") != -1) {
+      makers[i] = makers[i].substring(0, makers[i].indexOf(" ")) + "_" + makers[i].substring(makers[i].indexOf(" ") + 1);
+    }
+  }
+  console.log(makers);
+  
+  loadMatter();
 
 }

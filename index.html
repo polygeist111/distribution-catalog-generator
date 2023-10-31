@@ -39,6 +39,7 @@
 
     <div id="authStuff">
       <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+      <pre></pre>
       <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
       <pre id="content" style="white-space: pre-wrap;"></pre>
       <script src="googleAuth.js"></script>
@@ -46,10 +47,18 @@
       <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     </div>
 
-    <!--<pre id="content" style="white-space: pre-wrap;"></pre>
+    <!--<script src="index.js"></script>
+    <pre id="content" style="white-space: pre-wrap;"></pre>
     <script src="googleAuth.js"></script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>-->
+    <!--
+    <label for="file-upload" class="ms-Button ms-Button--primary">
+      <span class="ms-Button-label">LIST FILES IN DIR</span>
+      <span class="ms-Button-description">List Files In Directory</span>
+    </label>
+    <input id="file-upload" type="file" webkitdirectory="" directory="" hidden />
+    -->
     
   </body>
   <!--google quickstart-->
