@@ -55,12 +55,13 @@ function preload() {
   boldFont = loadFont('Fonts\\Brandon-Grotesque-Bold.otf');
   italFont = loadFont('Fonts\\Brandon-Grotesque-Regular-Italic.otf');
 
+  //console.log(readDirectory(FileSystem.getDirectory('InsertedCopy')));
   //loads front matter
   for (var i = 0; i < 3; i++) {
     var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
     frontMatter.push(toPush);
   }
-  //console.log(frontMatter);
+  console.log(frontMatter);
 
   //loads mid matter (maker profiles)
   for (var i = 0; i < 23; i++) {
@@ -280,31 +281,52 @@ function draw() {
       img = frontMatter[printIndex];
       img = resizeToPrint(img);
       image(img, 0, 0);
+
+      //fix footers
+      if (printIndex != 0) {
+        footer(0, 0);
+      }
+
       pdf.nextPage();
 
       printIndex++;
       console.log("front page " + printIndex);
+
       //maker matter
     } else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
       lastMaker = justMakerName(pricedWineList[wineIndex][0]);
       img = makerMatter[makerIndex];
       img = resizeToPrint(img);
       image(img, 0, 0);
-      pdf.nextPage();
 
+      //fix footers
+      footer(0, 392);
+
+      pdf.nextPage();
+    
       makerIndex++;
       printIndex++;
       console.log("maker page " + printIndex);
+
       //back matter
     } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
       img = backMatter[backIndex];
       img = resizeToPrint(img);
       image(img, 0, 0);
+
+      //fix footers
+      if (backIndex < 2) {
+        footer(243, 0);
+      } else {
+        footer(0, 0);
+      }
+
       pdf.nextPage();
 
       backIndex++;
       printIndex++;
       console.log("back page " + printIndex);
+
       //tech sheets
     } else if (wineIndex < pricedWineList.length) {
       pages();
@@ -312,13 +334,20 @@ function draw() {
       console.log("tech sheet page " + printIndex);
     }
 
-    //last back matter / last page
   } 
   
+  //last back matter / last page
   if (drawing && backIndex == backMatter.length - 1) {
     img = backMatter[backIndex];
     img = resizeToPrint(img);
     image(img, 0, 0);
+
+    //fix footers
+    if (backIndex < 2) {
+      footer(243, 0);
+    } else {
+      footer(0, 0);
+    }
     
     backIndex++;
     printIndex++;
@@ -403,7 +432,7 @@ function pages() {
 
   writeBody(thisWine[0]);
 
-  footer();
+  footer(0, 0);
 
   console.log(wineIndex);
   wineIndex++;
@@ -517,14 +546,6 @@ function loadImages() {
 
 
 
-/*
-*
-* End of Logic Section, Beginning of Renderer (multiply all dims by 1.02)
-*
-*/
-
-
-
 //Generates header
 function header(thisWine) {
   //header
@@ -632,22 +653,30 @@ function writeBody(thisWine) {
 
 
 //Generates footer
-function footer() {
+function footer(leftSide, rightSide) {
   let pageNum = pdf.elements.length / 2 + 1;
-  console.log("Page num: " + pageNum);
+  console.log("Page num: " + printIndex);
+  if (leftSide == 0) { leftSide = 60; }
+  if (rightSide == 0) { rightSide = 756; }
+  //rightSide -= leftSide;
+
+  //white box (clear potential prior footers)
+  fill("white");
+  noStroke();
+  rect(leftSide - 5, 990, rightSide - leftSide + 25, 1025);
 
   //divider line
   fill(ArchBlue);
   stroke(ArchBlue);
-  line(60, 1000, 756, 1000)
+  line(leftSide, 1000, rightSide, 1000)
   noStroke();
 
   //footer text
   textFont(regFont, 12);
-  textAlign(RIGHT);
-  text(pageNum, 756, 1010);
-  textAlign(LEFT);
-  text("Archetyp Catalog " + year(), 60, 1010);
+  textAlign(RIGHT, TOP);
+  text(printIndex + 1, rightSide, 1005);
+  textAlign(LEFT, TOP);
+  text("Archetyp Catalog " + year(), leftSide, 1005);
 
 }
 
@@ -835,4 +864,31 @@ function resizeToPrint(imgIn) {
   imgIn.width = 816;
   imgIn.height = 1056;
   return imgIn;
+}
+
+
+
+//Reads InsertedCopy Directory
+//Borrowed from https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
+function readDirectory(directory) {
+  let dirReader = directory.createReader();
+  let entries = [];
+
+  let getEntries = () => {
+    dirReader.readEntries(
+      (results) => {
+        if (results.length) {
+          entries = entries.concat(toArray(results));
+          getEntries();
+        }
+      },
+      (error) => {
+        /* handle error — error is a FileError object */
+      },
+    );
+  };
+
+  getEntries();
+  return entries;
+
 }
