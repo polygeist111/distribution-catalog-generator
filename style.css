@@ -47,3 +47,7 @@ html, body {
        url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.woff') format('woff'),
        url('Fonts\\Brandon-Grotesque-Regular.otf') format('opentype'); 
 } 
+
+:root {
+  --c7-page-height: 955px;
+}
