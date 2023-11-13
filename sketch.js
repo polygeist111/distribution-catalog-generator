@@ -1,4 +1,5 @@
 let button1;
+let button2; //depracated
 const productURL = "https://api.commerce7.com/v1/product?cursor="
 const appID = "distribution-catalog-generator";
 const ASK = "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0cHF1eThoeWtiS3ZGV0x2cGhaY2MyS2xBY3lnbDl0NzlKQ1ZiMTB2UDRNZERqZVBFbG8=";
@@ -23,6 +24,7 @@ var pdf;
 let determiningDim;
 
 let ArchBlue = '#2B3475';
+let C7Gray = "#222a30";
 let white = '#FFFFFF';
 
 let imgWidth = 170;
@@ -41,10 +43,9 @@ let lastMaker = "";
 let makerIndex = 0;
 let backIndex = 0;
 let allDone = false;
+let printReady = false;
 
 let tester;
-
-
 
 
 //let pageCount = 0;
@@ -65,7 +66,6 @@ function preload() {
 }
 
 function setup() {
-
   //readDir('InsertedCopy');
 
   frontMatter.splice(0, 3);
@@ -76,18 +76,30 @@ function setup() {
   //console.log(backMatter);
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8);
+  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 10) + "px; height: " + (canvas.height + 10) + "px; float: left;";
   
-  canvas.parent("canvas");
+  canvas.parent("canvas_shell");
 
   button1 = createButton('Generate Sheets');
-  button1.parent("canvas");
+  button1.parent("canvas_shell");
   button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
   button1.mousePressed(startPressed);
   button1.hide();
 
+  //button2 = createButton('Print Sheets');
+  //button2.parent("canvas_shell");
+  //button2.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  //button2.mousePressed(printPDF);
+  //button2.hide();
+
+  document.getElementById('printer_shell').style.display = "none";
+  document.getElementById('page_list').style.display = "none";
+
+
   //reStart();
   textFont(regFont);
   noStroke();
+  repositionButtons();
 }
 
 
@@ -96,9 +108,15 @@ function setup() {
 function windowResized() {
   if (!drawing) {
     if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+    //console.log(window.innerWidth + "x" + window.innerHeight + determiningDim);
     resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
     button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+    //button2.position(width * 0.5 - button2.width * 0.5,  height * -0.5 + button2.height * -0.5, "relative");
+    document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+
   }
+
+  repositionButtons();
 
 }
 
@@ -234,21 +252,22 @@ function wineName(wine) {
 //Handles start button input
 function startPressed() {
   fill(white);
-  canvas = resizeCanvas(816, 1056);
+  resizeCanvas(816, 1056);
+  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
 
   drawing = true;
   pdf.beginRecord();
   button1.hide();
 
-
+  repositionButtons();
 }
 
 
 
 //Draws to canvas, snaps and saves all product pages
 function draw() {
-  background(white);
-  
+  if (!drawing) { background(C7Gray); } else { background(white); }
+
   /*
   if (drawing && wineIndex < wineList.length - 1) {
     pages();
@@ -273,6 +292,12 @@ function draw() {
       img = resizeToPrint(img);
       image(img, 0, 0);
 
+      //console.log("Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png");
+      if (printIndex != 0) {
+        document.getElementById('page_list').innerHTML += ("<br>");
+      }
+      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
+
       //fix footers
       if (printIndex != 0) {
         footer(0, 0);
@@ -290,12 +315,15 @@ function draw() {
       img = resizeToPrint(img);
       image(img, 0, 0);
 
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
+      makerIndex++;
+
+
       //fix footers
       footer(0, 392);
 
       pdf.nextPage();
     
-      makerIndex++;
       printIndex++;
       console.log("maker page " + printIndex);
 
@@ -304,6 +332,9 @@ function draw() {
       img = backMatter[backIndex];
       img = resizeToPrint(img);
       image(img, 0, 0);
+
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backMatter[backIndex] + ".png";
+
 
       //fix footers
       if (backIndex < 2) {
@@ -321,6 +352,10 @@ function draw() {
       //tech sheets
     } else if (wineIndex < pricedWineList.length) {
       pages();
+      console.log(wineIndex + " " + pricedWineList[wineIndex])
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title;
+
+
       pdf.nextPage();
       console.log("tech sheet page " + printIndex);
     }
@@ -328,10 +363,12 @@ function draw() {
   } 
   
   //last back matter / last page
-  if (drawing && backIndex == backMatter.length - 1) {
+  if (drawing && backIndex == backMatter.length - 1 && !printReady) {
     img = backMatter[backIndex];
     img = resizeToPrint(img);
     image(img, 0, 0);
+
+    document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backMatter[backIndex] + ".png";
 
     //fix footers
     if (backIndex < 2) {
@@ -342,7 +379,14 @@ function draw() {
     
     backIndex++;
     printIndex++;
-    allDone = true;
+    noLoop();
+    //printReady = true;
+    //allDone = true;
+    //button2.show();
+    document.getElementById('printer_shell').style.display = 'block'
+    document.getElementById('page_list').style.display = "inline-block";
+    repositionButtons();
+
   }
   
   //Closing save (after last page)
@@ -350,6 +394,7 @@ function draw() {
     pdf.save();
     noLoop();
     allDone = false
+    printReady = false;
     reStart();
 
   }
@@ -357,6 +402,8 @@ function draw() {
 
 
   if (!drawing) {
+    document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+
     fill('#ED225D');
     textSize(30);
     textAlign(CENTER);
@@ -444,13 +491,17 @@ function reStart() {
   wineIndex = 0;
   drawing = false;
 
-  canvas = resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
+  //if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+  resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
+  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+
 
   noLoop();
   pdf = createPDF();
 
   populateProducts("start");
   button1.hide();
+  document.getElementById('printer_shell').style.display = "none";
   console.log("reStarted");
 
   definitiveLength = 0;
@@ -459,6 +510,7 @@ function reStart() {
   makerIndex = 0;
   backIndex = 0;
   allDone = false;
+  printReady = false;
 
 }
 
@@ -484,6 +536,7 @@ function wipeOut() {
   makerIndex = 0;
   backIndex = 0;
   allDone = false;
+  printReady = false;
 }
 
 
@@ -516,6 +569,19 @@ function filterPrices(priceIn) {
       p.position(420, 300);
   */
   //parseHTMLText(pricedWineList[0][0].content);
+}
+
+
+
+//Confirms pdf print
+function printPDF() {
+  //allDone = true;
+  console.log("printing");
+  pdf.save();
+  noLoop();
+  allDone = false
+  printReady = false;
+  reStart();
 }
 
 
@@ -930,3 +996,37 @@ function getMakers() {
   loadMatter();
 
 }
+
+
+
+//Repositions buttons in window based on location of canvas and page printout
+function repositionButtons() {
+  var thisCanvas = document.getElementById('canvas_shell');
+  var canvasRect = thisCanvas.getBoundingClientRect();
+  var canvasX = canvasRect.left + window.scrollX;
+  var canvasY = canvasRect.top + window.scrollY;
+
+  var thisPageList = document.getElementById('page_list');
+  var pageListRect = thisPageList.getBoundingClientRect();
+  var pageListX = pageListRect.left + window.scrollX;
+  var pageListY = pageListRect.top + window.scrollY;
+
+  var thisPrinter = document.getElementById('printer_shell');
+  var printerRect = thisPrinter.getBoundingClientRect();
+  var printerX = printerRect.left + window.scrollX;
+  var printerY = printerRect.top + window.scrollY;
+
+  //console.log(pageListRect + " " + pageListX + " " + pageListY);
+
+  var authStuff = document.getElementById('authStuff');
+
+  if (pageListX >= pageListY) {
+    authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
+  } else {
+    console.log(canvasRect.right + " " + window.scrollX);
+    authStuff.style = "top: " + canvasY + "px; margin-top: 0px; left: " + (canvasRect.right + window.scrollX) + "px;";
+  }
+}
+
+//Remove button2
+//Assess the dual restart functions, ideally remove one

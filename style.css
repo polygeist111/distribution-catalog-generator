@@ -1,12 +1,49 @@
 html, body {
-  margin: 10;
+  margin: 00;
   padding: 0;
 }
 
-canvas {
+#canvas_shell {
+  margin: 10px;
+  margin-top: 0px;
+  margin-right: 0px;
+
+  padding: 0;
   display: inline-block;
+  /*
+  margin-top: 0px;
+  margin-left: 0px;
+  height: 764px;
+  height: #canvas.height;
+  width: #canvas.width;*/
 }
 
-#authStuff{ 
-  margin-top: 10px; 
+#page_list {
+  font-family: "Brandon Grotesque", sans-serif;
+  margin-left: 10px;
+  display: inline-block;
+  width: 500px;
+  color: white;
 }
+
+#authStuff { 
+  margin-left: 10px;
+  margin-top: 8px; 
+  position: absolute;
+  
+}
+
+#instructions {
+  margin: 10px;
+  color: white;
+  font-family: "Brandon Grotesque", sans-serif;
+}
+
+@font-face { 
+  font-family: "Brandon Grotesque";
+  src: url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.eot');
+  src: url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.eot') format('embedded-opentype'),
+       url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.woff2') format('woff2'),
+       url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.woff') format('woff'),
+       url('Fonts\\Brandon-Grotesque-Regular.otf') format('opentype'); 
+} 
