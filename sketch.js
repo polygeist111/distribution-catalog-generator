@@ -137,6 +137,7 @@ function populateProducts(cursorIn) {
   })
   .catch(e => { console.log(e) });
 
+  repositionButtons();
 }
 
 
@@ -502,6 +503,8 @@ function reStart() {
   populateProducts("start");
   button1.hide();
   document.getElementById('printer_shell').style.display = "none";
+  document.getElementById('page_list').innerHTML = "";
+  document.getElementById('page_list').style.display = "none";
   console.log("reStarted");
 
   definitiveLength = 0;
@@ -511,7 +514,7 @@ function reStart() {
   backIndex = 0;
   allDone = false;
   printReady = false;
-
+  repositionButtons();
 }
 
 
@@ -1016,14 +1019,11 @@ function repositionButtons() {
   var printerX = printerRect.left + window.scrollX;
   var printerY = printerRect.top + window.scrollY;
 
-  //console.log(pageListRect + " " + pageListX + " " + pageListY);
-
   var authStuff = document.getElementById('authStuff');
 
   if (pageListX >= pageListY) {
     authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
   } else {
-    console.log(canvasRect.right + " " + window.scrollX);
     authStuff.style = "top: " + canvasY + "px; margin-top: 0px; left: " + (canvasRect.right + window.scrollX) + "px;";
   }
 }
