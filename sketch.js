@@ -354,7 +354,7 @@ function draw() {
     } else if (wineIndex < pricedWineList.length) {
       pages();
       console.log(wineIndex + " " + pricedWineList[wineIndex])
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title;
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printIndex + ": " + pricedWineList[wineIndex - 1][0].title;
 
 
       pdf.nextPage();
@@ -525,6 +525,10 @@ function wipeOut() {
   wineList = [];
   pricedWineList = [];
   allPages = [];
+
+  frontMatter = [];
+  makerMatter = [];
+  backMatter = [];
 
   wineIndex = 0;
   drawing = false;
@@ -959,6 +963,9 @@ function readDirectory(directory) {
 function loadMatter() {
   //console.log(readDirectory(FileSystem.getDirectory('InsertedCopy')));
   //loads front matter
+  frontMatter = [];
+  makerMatter = [];
+  backMatter = [];
   for (var i = 0; i < 3; i++) {
     var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
     frontMatter.push(toPush);

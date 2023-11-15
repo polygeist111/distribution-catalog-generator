@@ -1,0 +1,9 @@
+Improvements:
+Dynamic maker page wine list
+Redesign UI to match C7
+Integrate iFrameResizer.js to fix in-C7 presentation
+
+Bugs:
+"Save as PDF" cuts pages weird
+
+Urgent:

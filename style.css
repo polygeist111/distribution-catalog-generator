@@ -50,4 +50,5 @@ html, body {
 
 :root {
   --c7-page-height: 955px;
+  /*onload="resizeIframe(this);*/
 }
