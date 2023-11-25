@@ -5,5 +5,6 @@ Integrate iFrameResizer.js to fix in-C7 presentation
 
 Bugs:
 "Save as PDF" cuts pages weird
+Divs don't size correctly on chrome
 
 Urgent:
