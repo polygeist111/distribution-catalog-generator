@@ -339,7 +339,7 @@ function draw() {
       img = resizeToPrint(img);
       image(img, 0, 0);
 
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backMatter[backIndex] + ".png";
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + (backIndex + 1) + ".png";
 
 
       //fix footers
@@ -361,12 +361,14 @@ function draw() {
       console.log(wineIndex + " " + pricedWineList[wineIndex])
       document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printIndex + ": " + pricedWineList[wineIndex - 1][0].title;
 
-
+      //wineIndex--;
+      //printIndex--;
       pdf.nextPage();
       console.log("tech sheet page " + printIndex);
     }
 
   } 
+  
   
   //last back matter / last page
   if (drawing && backIndex == backMatter.length - 1 && !printReady) {
@@ -374,7 +376,7 @@ function draw() {
     img = resizeToPrint(img);
     image(img, 0, 0);
 
-    document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backMatter[backIndex] + ".png";
+    document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + (backIndex + 1) + ".png";
 
     //fix footers
     if (backIndex < 2) {
@@ -468,8 +470,9 @@ function pages() {
     save(allPages[page], modelName + "_instructions_" + page + ".png");
   }*/
 
-  header(thisWine);
+  //header(thisWine);
 
+  //bottleshot also calls header (to avoid vectorization bug where header text was rasterized)
   bottleShot(thisWine);
 
   priceBox(thisWine);
@@ -619,11 +622,14 @@ function loadImages() {
 
 //Generates header
 function header(thisWine) {
+  textStyle(NORMAL);
   //header
   fill(ArchBlue);
   rect(0, 0, 816, 244);
   
   fill(white);
+  noStroke();
+  
   textAlign(LEFT);
   //textFont("Brandon Grotesque", 24);
   textFont(boldFont, 28);
@@ -634,8 +640,6 @@ function header(thisWine) {
   textFont(italFont, 20);
   text(thisWine[0].subTitle, 62, 175);
   textFont(regFont);
-
-  textStyle(NORMAL);
   
 }
 
@@ -658,12 +662,14 @@ function bottleShot(thisWine) {
   //62,96
   image(img, 210 - img.width / 2, 280);
 
+  header(thisWine);
 }
 
 
 
 //Generates body text
 function writeBody(thisWine) {
+
   let left = 420;
   let top = 275;
   let lastBox = null;
@@ -695,7 +701,7 @@ function writeBody(thisWine) {
       thisHeight = top;
     } else { 
       thisHeight = textHeight(value, maxWidth) + 10;
-      console.log(thisHeight);
+      //console.log(thisHeight);
     }
     totalHeight += thisHeight;
 
