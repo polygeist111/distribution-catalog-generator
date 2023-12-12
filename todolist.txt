@@ -8,3 +8,4 @@ Bugs:
 Divs don't size correctly on chrome
 
 Urgent:
+REMOVE CANVAS FROM canvas_shell -- resize the two in tandem, rather than childing the canvas to it
