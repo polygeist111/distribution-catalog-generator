@@ -75,16 +75,20 @@ function setup() {
   //console.log(makerMatter);
   //console.log(backMatter);
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
-  var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8);
-  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 10) + "px; height: " + (canvas.height + 10) + "px; float: left;";
-  
-  canvas.parent("canvas_shell");
+  var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8, SVG);
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
+  //document.getElementById("defaultCanvas").parent = document.getElementById('canvas_shell');
+  document.getElementById('canvas_shell').appendChild(document.getElementById("defaultCanvas"));
+  //canvas.parent("canvas_shell");
+  //document.getElementById('canvas_shell').appendChild(canvas);
 
-  button1 = createButton('Generate Sheets');
-  button1.parent("canvas_shell");
-  button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
-  button1.mousePressed(startPressed);
-  button1.hide();
+  //button1 = createButton('Generate Sheets');
+  //button1.parent("canvas_shell");
+  //button1 = document.getElementById("confirm_generation");
+  //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  //button1.mousePressed(startPressed);
+  //button1.hide();
+  document.getElementById("confirm_generation").style.visibility = "hidden";
 
   //button2 = createButton('Print Sheets');
   //button2.parent("canvas_shell");
@@ -110,9 +114,9 @@ function windowResized() {
     if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
     //console.log(window.innerWidth + "x" + window.innerHeight + determiningDim);
     resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
-    button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+    //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
     //button2.position(width * 0.5 - button2.width * 0.5,  height * -0.5 + button2.height * -0.5, "relative");
-    document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+    document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
   }
 
@@ -254,11 +258,12 @@ function wineName(wine) {
 function startPressed() {
   fill(white);
   resizeCanvas(816, 1056);
-  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
   drawing = true;
   pdf.beginRecord();
-  button1.hide();
+  //button1.hide();
+  document.getElementById("confirm_generation").style.visibility = "hidden";
 
   repositionButtons();
 }
@@ -403,7 +408,7 @@ function draw() {
 
 
   if (!drawing) {
-    document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+    document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
     fill('#ED225D');
     textSize(30);
@@ -494,14 +499,15 @@ function reStart() {
 
   //if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
-  document.getElementById('canvas_shell').style = "width: " + (canvas.width + 1) + "px; height: " + (canvas.height + 1) + "px; border: 1px solid white; float: left;";
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + (-1)) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + (-1)) + "px; border: 1px solid white; float: left;";
 
 
   noLoop();
   pdf = createPDF();
 
   populateProducts("start");
-  button1.hide();
+  //button1.hide();
+  document.getElementById("confirm_generation").style.visibility = "hidden";
   document.getElementById('printer_shell').style.display = "none";
   document.getElementById('page_list').innerHTML = "";
   document.getElementById('page_list').style.display = "none";
@@ -535,7 +541,8 @@ function wipeOut() {
 
   noLoop();
 
-  button1.hide();
+  //button1.hide();
+  document.getElementById("confirm_generation").style.visibility = "hidden";
 
   definitiveLength = 0;
   printIndex = 0;
@@ -604,7 +611,7 @@ function loadImages() {
   definitiveLength = pricedWineList.length + frontMatter.length + makers.length + backMatter.length;
   console.log("Definitive Length: " + definitiveLength);
 
-  setTimeout(function() { button1.show(); }, 2000);
+  setTimeout(function() { /*button1.show();*/document.getElementById("confirm_generation").style.visibility = "visible"; }, 2000);
   
 }
 
@@ -1027,12 +1034,30 @@ function repositionButtons() {
   var printerY = printerRect.top + window.scrollY;
 
   var authStuff = document.getElementById('authStuff');
+  var confirmButton = document.getElementById('confirm_generation');
 
+  //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
+  //console.log(document.getElementById("confirm_generation").style.visibility);
+  //console.log(document.getElementById("confirm_generation").getBoundingClientRect().height);
+  var visibility = confirmButton.style.visibility;
+  var buttonHeight = confirmButton.getBoundingClientRect().height;
+  var buttonWidth = confirmButton.getBoundingClientRect().width;
+  //console.log(buttonHeight / 2);
+  //console.log(confirmButton.style);
+  //console.log(confirmButton.getBoundingClientRect());
+  //console.log("top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2) + "px; visibility: " + visibility + "; position: absolute;");
+  //confirmButton.style = "top: " + (-1 * canvasRect.top) + "px; left: " + (-1 * canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
+  //console.log(confirmButton.getBoundingClientRect());
+  //confirmButton.style = "top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2 - canvasRect.top) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2 - canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
+  confirmButton.style = "top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2) + "px; visibility: " + visibility + "; position: absolute;";
+  
   if (pageListX >= pageListY) {
     authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
   } else {
     authStuff.style = "top: " + canvasY + "px; margin-top: 0px; left: " + (canvasRect.right + window.scrollX) + "px;";
   }
+  //console.log(confirmButton.style);
+  //console.log(confirmButton.getBoundingClientRect());
 }
 
 //Remove button2
