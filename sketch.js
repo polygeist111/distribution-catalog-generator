@@ -318,12 +318,21 @@ function draw() {
     } else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
       lastMaker = justMakerName(pricedWineList[wineIndex][0]);
       img = makerMatter[makerIndex];
+      //console.log(img.width + " " + img.height);
+      var imgW = img.width;
+      var imgH = img.height;
+      var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
+      //console.log(lastMaker + " " + imgW + " " + imgH);
       img = resizeToPrint(img);
       image(img, 0, 0);
+
 
       document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
       makerIndex++;
 
+      //fix top right wine listing
+      makerWineList(img2, imgW, imgH);
+      //makerWineList(img, imgW, imgH);
 
       //fix footers
       footer(0, 392);
@@ -755,6 +764,143 @@ function footer(leftSide, rightSide) {
   textAlign(LEFT, TOP);
   text("Archetyp Catalog " + year(), leftSide, 1005);
 
+}
+
+
+
+//Generates wine list on top right of maker pages
+function makerWineList(thisImg, thisWidth, thisHeight) {
+  imageMode(CORNER);
+  thisImg.resize(204, 1056);
+  //image(thisImg, 0, 0);
+
+  let thisContent = [];
+
+  //identifies box area
+  var foundEnd = false;
+  var lastBlue = 0;
+  while(!foundEnd && lastBlue < thisImg.height) {
+    //if (thisImg.get(203, lastBlue))
+    var color = thisImg.get(203, lastBlue);
+    console.log(color[0] + " " + color[1] + " " + color[2]);
+    if (color[0] != 43 || color[1] != 52 || color[2] != 117) {
+      foundEnd = true;
+    } 
+    lastBlue++;
+  }
+  lastBlue--;
+  console.log("lastBlue = " + lastBlue);
+
+  //fills box
+  fill(ArchBlue);
+  rectMode(CORNER);
+  rect(426, 0, 390, lastBlue);
+
+  //fills list of current wines
+  
+  //adds text
+  textAlign(LEFT, TOP);
+  let thisInd = wineIndex;
+  while(thisInd < pricedWineList.length && justMakerName(pricedWineList[thisInd][0]) == justMakerName(pricedWineList[wineIndex][0])) {
+    console.log(pricedWineList[thisInd][0].seo.title)
+    thisContent.push(pricedWineList[thisInd][0].seo.title);
+    thisInd++;
+  }
+  console.log(thisContent);
+  
+  let left = 481;
+  //let top = 275;
+  let lastBox = null;
+  let maxWidth = 280;
+  let maxHeight = lastBlue - 20;
+  var thisHeight = 0;
+  let totalHeight = lastBlue / 2;
+  
+ 
+  let value = "";
+
+  //textFont(boldFont);
+  //console.log(textWidth(thisContent[0].substring(0, thisContent[0].indexOf(":") + 1)));
+  //textFont(regFont);
+  //console.log(textWidth(thisContent[0].substring(0, thisContent[0].indexOf(":") + 1)));
+  //console.log(textWidth(" "));
+  //console.log(thisContent.length);
+  fill(white);
+  for (var i = 0; i <= thisContent.length; i++) {
+
+    //sets text block height
+    if (lastBox == null) {
+      thisHeight = 0;
+      textFont(boldFont, 20);
+      value = "Wines"
+    } else {
+      thisHeight = 0;
+      textFont(regFont, 14);
+      value = thisContent[i - 1];
+    }
+    if (i == 1) { thisHeight += 5; }
+
+    thisHeight += (textHeight(value, maxWidth) + 10) / 2;
+    console.log(thisHeight);
+
+    totalHeight -= thisHeight;
+    console.log(totalHeight);
+
+    //assigns key, value, and spacer
+    //textFont(boldFont);
+    //key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
+    
+    //value = thisContent[i].substring(thisContent[i].indexOf(":") + 1);
+
+    //Prints descriptive text
+    //textFont(boldFont);
+    //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
+    //text(key, left, totalHeight, maxWidth, maxHeight);
+    
+    //textFont(regFont);
+    //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
+    console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
+    lastBox = value
+  }
+  lastBox = null;
+  //totalHeight *= -1;
+
+  for (var i = 0; i <= thisContent.length; i++) {
+
+    //sets text block height
+    if (lastBox == null) {
+      thisHeight = 0;
+      textFont(boldFont, 20);
+      value = "Wines"
+    } else {
+      thisHeight = 0;
+      textFont(regFont, 14);
+      value = thisContent[i - 1];
+    }
+    
+    if (i == 1) { thisHeight += 10; }
+    thisHeight += textHeight(value, maxWidth) + 10;
+    console.log(thisHeight);
+
+    totalHeight += thisHeight;
+    console.log(totalHeight);
+
+    //assigns key, value, and spacer
+    //textFont(boldFont);
+    //key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
+    
+    //value = thisContent[i].substring(thisContent[i].indexOf(":") + 1);
+
+    //Prints descriptive text
+    //textFont(boldFont);
+    //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
+    //text(key, left, totalHeight, maxWidth, maxHeight);
+    
+    //textFont(regFont);
+    //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
+    console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
+    lastBox = text(value, left, totalHeight, maxWidth, maxHeight);
+  }
 }
 
 
