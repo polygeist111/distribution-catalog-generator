@@ -814,7 +814,10 @@ function makerWineList(thisImg, thisWidth, thisHeight) {
   let maxWidth = 280;
   let maxHeight = lastBlue - 20;
   var thisHeight = 0;
-  let totalHeight = lastBlue / 2;
+  let totalHeight = 0;
+
+  let boldFontSize = 22;
+  let regFontSize = 15;
   
  
   let value = "";
@@ -831,55 +834,16 @@ function makerWineList(thisImg, thisWidth, thisHeight) {
     //sets text block height
     if (lastBox == null) {
       thisHeight = 0;
-      textFont(boldFont, 20);
+      textFont(boldFont, boldFontSize);
       value = "Wines"
     } else {
       thisHeight = 0;
-      textFont(regFont, 14);
+      textFont(regFont, regFontSize);
       value = thisContent[i - 1];
     }
-    if (i == 1) { thisHeight += 5; }
+    //if (i == 1) { thisHeight += 5; }
 
-    thisHeight += (textHeight(value, maxWidth) + 10) / 2;
-    console.log(thisHeight);
-
-    totalHeight -= thisHeight;
-    console.log(totalHeight);
-
-    //assigns key, value, and spacer
-    //textFont(boldFont);
-    //key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
-    
-    //value = thisContent[i].substring(thisContent[i].indexOf(":") + 1);
-
-    //Prints descriptive text
-    //textFont(boldFont);
-    //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
-    //text(key, left, totalHeight, maxWidth, maxHeight);
-    
-    //textFont(regFont);
-    //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
-    console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
-    lastBox = value
-  }
-  lastBox = null;
-  //totalHeight *= -1;
-
-  for (var i = 0; i <= thisContent.length; i++) {
-
-    //sets text block height
-    if (lastBox == null) {
-      thisHeight = 0;
-      textFont(boldFont, 20);
-      value = "Wines"
-    } else {
-      thisHeight = 0;
-      textFont(regFont, 14);
-      value = thisContent[i - 1];
-    }
-    
-    if (i == 1) { thisHeight += 10; }
-    thisHeight += textHeight(value, maxWidth) + 10;
+    thisHeight += (textHeight(value, maxWidth) + 10);
     console.log(thisHeight);
 
     totalHeight += thisHeight;
@@ -899,7 +863,50 @@ function makerWineList(thisImg, thisWidth, thisHeight) {
     //textFont(regFont);
     //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
     console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
-    lastBox = text(value, left, totalHeight, maxWidth, maxHeight);
+    lastBox = value
+  }
+  lastBox = null;
+  console.log("total height: " + totalHeight); 
+  //totalHeight *= -1;
+  totalHeight = (lastBlue * 0.5) - (totalHeight * 0.5) - 5;
+  console.log("adjusted total height: " + totalHeight); 
+
+
+  for (var i = 0; i <= thisContent.length; i++) {
+
+    //sets text block height
+    if (lastBox == null) {
+      thisHeight = 0;
+      textFont(boldFont, boldFontSize);
+      value = "Wines"
+    } else {
+      thisHeight = 0;
+      textFont(regFont, regFontSize);
+      value = thisContent[i - 1];
+    }
+    
+    //if (i == 1) { thisHeight += 5; }
+    thisHeight += textHeight(value, maxWidth) + 10;
+    //console.log(thisHeight);
+
+    totalHeight += thisHeight;
+    //console.log(totalHeight);
+
+    //assigns key, value, and spacer
+    //textFont(boldFont);
+    //key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
+    
+    //value = thisContent[i].substring(thisContent[i].indexOf(":") + 1);
+
+    //Prints descriptive text
+    //textFont(boldFont);
+    //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
+    //text(key, left, totalHeight, maxWidth, maxHeight);
+    
+    //textFont(regFont);
+    //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
+    console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
+    lastBox = text(value, left, totalHeight - thisHeight, maxWidth, maxHeight);
   }
 }
 
