@@ -128,7 +128,7 @@
           response = await gapi.client.sheets.spreadsheets.values.get({
             //spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
             spreadsheetId: "1BQ_PvKodVuq5UxEUaDfyRRiaMoPyxqsSMFmdRXcdHzQ",
-            range: 'TradePricingConcise!D2:E',
+            range: 'TradePricingConcise (DO NOT EDIT)!D2:E',
           });
         } catch (err) {
           document.getElementById('content').innerText = err.message;
