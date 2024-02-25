@@ -22,6 +22,20 @@ let drawing = false;
 
 var pdf;
 var currentPage;
+
+var footerGraphic;
+var productGraphic;
+var insertGraphic;
+var priceGraphic;
+
+var yesOverlays = false; //tied to footer graphic, also includes maker page top right
+var yesProducts = false;
+var yesInserts = false;
+var yesPrices = false;
+
+var printedPages = 0;
+
+
 var vectorsOnly = false;
 
 let determiningDim;
@@ -273,9 +287,33 @@ function startPressed() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //Draws to canvas, snaps and saves all product pages
 //The checks for vectorsOnly don't render anything but insert matter overlay if they fail
 function draw() {
+
   if (!drawing) { 
     background(C7Gray); 
   } else { 
@@ -288,11 +326,23 @@ function draw() {
     productGraphic = createGraphics(width, height);
     insertGraphic = createGraphics(width, height);
 
+    //yesOverlays = true; //tied to footer graphic, also includes maker page top right
+    yesOverlays = false;
 
+    //yesProducts = true;
+    yesProducts = false;
+
+    //yesInserts = true;
+    yesInserts = false;
+
+    //yesPrices = true;
+    yesPrices = false;
   }
 
   
   console.log("current pg: " + width + " " + height);
+  //console.log(printIndex);
+
   /*
   if (drawing && wineIndex < wineList.length - 1) {
     pages();
@@ -311,128 +361,55 @@ function draw() {
   */
   //console.log(pricedWineList[wineIndex + 1][0]);
   //console.log(lastMaker);
-  let img;
+
+
+  //draws all but last page
   if (drawing && printIndex < definitiveLength - 1 && !allDone) {
+    let whichType = -1;
     //front matter
     if (printIndex < frontMatter.length) {
-      if (!vectorsOnly) {
-        img = frontMatter[printIndex];
-        img = resizeToPrint(img);
-        currentPage.image(img, 0, 0);
-      }
       
-      //console.log("Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png");
-      if (printIndex != 0) {
-        document.getElementById('page_list').innerHTML += ("<br>");
-      }
-      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
-
-      //fix footers
-      if (printIndex != 0) {
-        footer(0, 0);
-      }
-
-      image(currentPage, 0, 0);
-      footer(0, 0);
-
-      pdf.nextPage();
-
-      printIndex++;
-      console.log("front page " + printIndex);
+      drawFrontMatter();
+      whichType = 1;
 
       //maker matter
-    } if (printIndex == 2) { noLoop(); } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
-      lastMaker = justMakerName(pricedWineList[wineIndex][0]);
-      img = makerMatter[makerIndex];
-      //console.log(img.width + " " + img.height);
-      var imgW = img.width;
-      var imgH = img.height;
-      var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
-      //console.log(lastMaker + " " + imgW + " " + imgH);
-      img = resizeToPrint(img);
-      image(img, 0, 0);
-
-
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
-      makerIndex++;
-
-      //fix top right wine listing
-      makerWineList(img2, imgW, imgH);
-      //makerWineList(img, imgW, imgH);
-
-      //fix footers
-      footer(0, 392);
-
-      pdf.nextPage();
-    
-      printIndex++;
-      console.log("maker page " + printIndex);
+    } else if (printIndex == 2) { 
+      noLoop(); 
+    } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
+      
+      drawMakerMatter();
+      whichType = 2;
 
       //back matter
     } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
-      img = backMatter[backIndex];
-      img = resizeToPrint(img);
-      image(img, 0, 0);
-
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + (backIndex + 1) + ".png";
-
-
-      //fix footers
-      if (backIndex < 2) {
-        footer(243, 0);
-      } else {
-        footer(0, 0);
-      }
-
-      pdf.nextPage();
-
-      backIndex++;
-      printIndex++;
-      console.log("back page " + printIndex);
+      
+      drawGeneralBackMatter();
+      whichType = 3;
 
       //tech sheets
     } else if (wineIndex < pricedWineList.length) {
-      pages();
-      footer(0, 0);
-      console.log(wineIndex + " " + pricedWineList[wineIndex])
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printIndex + ": " + pricedWineList[wineIndex - 1][0].title;
+      
+      drawTechSheets();
+      whichType = 4;
 
-      //wineIndex--;
-      //printIndex--;
-      pdf.nextPage();
-      console.log("tech sheet page " + printIndex);
     }
+
+    compilePage(whichType); 
+    
+    printIndex++;
     //end here
   } 
   
   
   //last back matter / last page
   if (drawing && backIndex == backMatter.length - 1 && !printReady) {
-    img = backMatter[backIndex];
-    img = resizeToPrint(img);
-    image(img, 0, 0);
-
-    document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + (backIndex + 1) + ".png";
-
-    //fix footers
-    if (backIndex < 2) {
-      footer(243, 0);
-    } else {
-      footer(0, 0);
-    }
     
-    backIndex++;
-    printIndex++;
-    noLoop();
-    //printReady = true;
-    //allDone = true;
-    //button2.show();
-    document.getElementById('printer_shell').style.display = 'block'
-    document.getElementById('page_list').style.display = "inline-block";
-    repositionButtons();
+    drawLastBackMatter();
+    whichType = 5;
+    compilePage(whichType);
     
   }
-  
+  /*
   //Closing save (after last page)
   if (allDone) {
     pdf.save();
@@ -441,7 +418,7 @@ function draw() {
     printReady = false;
     reStart();
 
-  }
+  }*/
 
 
 
@@ -462,6 +439,241 @@ function draw() {
 
 
 
+
+
+
+
+
+
+
+
+
+function compilePage(whichType) {
+
+  if (yesInserts) {
+    //currentPage.image(insertGraphic, 0, 0);
+    console.log("adding insert");
+  }
+  if (yesProducts) {
+    //currentPage.image(productGraphic, 0, 0);
+    console.log("adding product");
+  }
+  if (yesOverlays) {
+    //currentPage.image(footerGraphic, 0, 0);
+    console.log("adding overlay");
+  }
+  if (yesPrices) {
+    //currentPage.image(priceGraphic, 0, 0);
+    console.log("adding this wine price");
+  }
+
+  //image(currentPage, 0, 0);
+
+  console.log("writing to screen");
+
+  if (!yesOverlays && yesProducts) {
+    if (whichType == 4) {
+      /*if (printedPages - 1 != pricedWineList.length) {
+        pdf.nextPage();
+      }*/
+      pdf.nextPage();
+      printedPages++;
+      console.log("saving product page to pdf");
+    } else {
+      whichType = -1;
+    }
+  } else {
+    if (whichType != 5 ) {
+      pdf.nextPage();
+      console.log("saving page to pdf");
+    } else {
+      console.log("final page to pdf");
+    }
+    printedPages++;
+  }
+
+  switch (whichType) {
+    case 1:
+      if (printIndex != 0) {
+        document.getElementById('page_list').innerHTML += ("<br>");
+      }
+      document.getElementById('page_list').innerHTML += "&nbsp;Page " + printedPages + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
+      break;
+
+    case 2:
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
+      break;
+
+    case 3:
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
+      break;
+      
+    case 4:
+      if (printedPages != 2) {
+        document.getElementById('page_list').innerHTML += ("<br>");
+      }
+      document.getElementById('page_list').innerHTML += "&nbsp;Page " + printedPages + ": " + pricedWineList[wineIndex - 1][0].title;
+      break;
+
+    case 5:
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
+      break;
+
+    default:
+      break;
+
+  }
+  console.log("list: " + document.getElementById('page_list').innerHTML);
+}
+
+
+
+function drawFrontMatter() {
+  let img;
+  if (!vectorsOnly) {
+    img = frontMatter[printIndex];
+    img = resizeToPrint(img);
+    insertGraphic.image(img, 0, 0);
+  }
+  
+  //console.log("Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png");
+
+  //fix footers
+  if (printIndex != 0) {
+    footer(0, 0);
+  }
+  insertGraphic.image(footerGraphic, 0, 0);
+
+  //image(currentPage, 0, 0);
+  //footer(0, 0);
+
+  //pdf.nextPage();
+
+  console.log("front page " + printIndex);
+}
+
+
+
+function drawMakerMatter() {
+  let img;
+  lastMaker = justMakerName(pricedWineList[wineIndex][0]);
+  img = makerMatter[makerIndex];
+  //console.log(img.width + " " + img.height);
+  var imgW = img.width;
+  var imgH = img.height;
+  var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
+  //console.log(lastMaker + " " + imgW + " " + imgH);
+  img = resizeToPrint(img);
+  insertGraphic.image(img, 0, 0);
+
+  makerIndex++;
+
+  //fix top right wine listing
+  makerWineList(img2, imgW, imgH);
+  //makerWineList(img, imgW, imgH);
+
+  //fix footers
+  footer(0, 392);
+  insertGraphic.image(footerGraphic, 0, 0);
+
+  //pdf.nextPage();
+    
+  console.log("maker page " + printIndex);
+}
+
+
+
+function drawGeneralBackMatter() {
+  let img;
+  img = backMatter[backIndex];
+  img = resizeToPrint(img);
+  insertGraphic.image(img, 0, 0);
+
+  //fix footers
+  if (backIndex < 2) {
+    footer(243, 0);
+  } else {
+    footer(0, 0);
+  }
+  insertGraphic.image(footerGraphic, 0, 0);
+
+  //pdf.nextPage();
+
+  backIndex++;
+  console.log("back page " + printIndex);
+  
+}
+
+
+
+function drawTechSheets() {
+  pages();
+  footer(0, 0);
+  productGraphic.image(footerGraphic, 0, 0);
+
+  console.log(wineIndex + " " + pricedWineList[wineIndex])
+
+  //wineIndex--;
+  //printIndex--;
+  //pdf.nextPage();
+  console.log("tech sheet page " + printIndex);
+  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1) {
+    noLoop();
+    //printReady = true;
+    allDone = true;
+    //button2.show();
+    document.getElementById('printer_shell').style.display = 'block'
+    document.getElementById('page_list').style.display = "inline-block";
+    repositionButtons();
+  }
+}
+
+
+
+function drawLastBackMatter() {
+  console.log("drawing last page");
+  let img;
+  img = backMatter[backIndex];
+  img = resizeToPrint(img);
+  insertGraphic.image(img, 0, 0);
+
+  //fix footers
+  if (backIndex < 2) {
+    footer(243, 0);
+  } else {
+    footer(0, 0);
+  }
+  insertGraphic.image(footerGraphic, 0, 0);
+    
+  backIndex++;
+
+  
+  noLoop();
+  //printReady = true;
+  allDone = true;
+  //button2.show();
+  document.getElementById('printer_shell').style.display = 'block'
+  document.getElementById('page_list').style.display = "inline-block";
+  repositionButtons();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //converts price(s) into formatted string with dividers as needed
 function formatPrice(thisWine) {
   let price = "";
@@ -477,6 +689,7 @@ function formatPrice(thisWine) {
 
 //Iterates through wineList to create product pages (requires Nicole's designs) - consider special case for multiple variants
 function pages() {
+  productGraphic.background("white");
   var thisWine = pricedWineList[wineIndex];
   productGraphic.fill('#ED225D');
   productGraphic.textSize(30);
@@ -521,7 +734,6 @@ function pages() {
 
   console.log(wineIndex);
   wineIndex++;
-  printIndex++;
 
 }
 
@@ -553,6 +765,13 @@ function reStart() {
   productGraphic = null;
   insertGraphic = null;
 
+  yesOverlays = false;
+  yesProducts = false;
+  yesInserts = false;
+  yesPrices = false;
+
+  printedPages = 0;
+
   vectorsOnly = false;
 
   populateProducts("start");
@@ -571,36 +790,6 @@ function reStart() {
   allDone = false;
   printReady = false;
   repositionButtons();
-}
-
-
-
-//Wipes all read data
-function wipeOut() {
-  productList = [];
-  wineList = [];
-  pricedWineList = [];
-  allPages = [];
-
-  frontMatter = [];
-  makerMatter = [];
-  backMatter = [];
-
-  wineIndex = 0;
-  drawing = false;
-
-  noLoop();
-
-  //button1.hide();
-  document.getElementById("confirm_generation").style.visibility = "hidden";
-
-  definitiveLength = 0;
-  printIndex = 0;
-  lastMaker = "";
-  makerIndex = 0;
-  backIndex = 0;
-  allDone = false;
-  printReady = false;
 }
 
 
@@ -640,13 +829,16 @@ function filterPrices(priceIn) {
 
 
 
-//Confirms pdf print
-function printPDF() {
-  //allDone = true;
+//Confirms pdf print, called from html
+function printPDF() {  
   console.log("printing");
   console.log("Full PDF Contents: ");
   console.log(pdf);
-  pdf.save();
+  if (!yesOverlays && yesProducts) {
+    //pdf.endRecord();
+  }
+    pdf.save();
+  
   noLoop();
   allDone = false
   printReady = false;
@@ -783,11 +975,9 @@ function writeBody(thisWine) {
 
 //Generates footer
 function footer(leftSide, rightSide) {
-  let pageNum = pdf.elements.length / 2 + 1;
   console.log("Page num: " + printIndex);
   if (leftSide == 0) { leftSide = 60; }
   if (rightSide == 0) { rightSide = 756; }
-  //rightSide -= leftSide;
 
   //white box (clear potential prior footers)
   footerGraphic.fill("white");
@@ -806,6 +996,7 @@ function footer(leftSide, rightSide) {
   footerGraphic.text(printIndex + 1, rightSide, 1005);
   footerGraphic.textAlign(LEFT, TOP);
   footerGraphic.text("Archetyp Catalog " + year(), leftSide, 1005);
+  //clear();
 
 }
 
@@ -969,6 +1160,7 @@ function priceBox(thisWine) {
   priceGraphic.textAlign(CENTER, CENTER);
   priceGraphic.text(formatPrice(thisWine), 588, 942);
   priceGraphic.textAlign(LEFT, TOP);
+  console.log("This wine price: " + formatPrice(thisWine));
 }
 
 
@@ -1262,5 +1454,23 @@ function repositionButtons() {
   //console.log(confirmButton.getBoundingClientRect());
 }
 
+/*
+
+Four modes:
+
+Name             | Toggle Price  | Associated Graphic Object(s)                  | Included Modes                 | Included Pages (For combos, higher amount dominates)
+Print Overlays   | N             | footerGraphic (includes maker page headers)   | Self                           | All
+Product Pages    | Y             | productGraphic                                | Self                           | Product Pages
+Print-Ready Kit  | Y             | footerGraphic, productGraphic                 | Print Overlays, Product Pages  | All
+Full Catalog     | Y             | footerGraphic, productGraphic, insertGraphic  | Self, Print-Ready Kit          | All
+
+Any mode with price toggled on will also include priceGraphic
+
+user selection will use a Radio DOM object for mode, and a checkbox DOM object for price toggle
+
+*/
+
+
 //Remove button2
 //Assess the dual restart functions, ideally remove one (reStart and wipeOut)
+//InsertMatter currently doesn't include footers or top corners
