@@ -43,11 +43,35 @@
 
     <div>
       <div id="canvas_shell" style="border:1px solid white">
-        <button id="confirm_generation" onclick="startPressed()">Generate Sheets</button>
+        <div id="generation_settings">
+          <button id="confirm_generation" onclick="startPressed()">Generate Sheets</button>
+          <form id="modeSelect" style="visibility: hidden">
+            <fieldset>
+              <legend style="border:1px solid white;">Choose output mode</legend>
+
+              <!--Mode selector radio-->
+              <input type="radio" name="contentMode" id="Full Catalog" value="Full Catalog" checked="true"/>
+              <label for="Full Catalog">Full Catalog</label><br> 
+              <input type="radio" name="contentMode" id="Print-Ready Kit" value="Print-Ready Kit"/>
+              <label for="Print-Ready Kit">Print-Ready Kit</label><br>
+              <input type="radio" name="contentMode" id="Tech Sheets" value="Tech Sheets"/>
+              <label for="Tech Sheets">Tech Sheets</label><br>
+              <input type="radio" name="contentMode" id="Overlays" value="Overlays"/>
+              <label for="Overlays">Overlays</label><br>
+
+              <!--Price inclusion-->
+              <input type="checkbox" name="priceIncluded" id="priceIncluded" value="yes" checked="true" style="margin-top: 10px;"/>
+              <label for="priceIncluded">Include Price?</label>
+
+            </fieldset>
+          </form>
+          
+        </div>
+
         
       </div>
 
-      <div id="page_list" style="border:1px solid white; ">
+      <div id="page_list" style="border:1px solid white;">
       </div>
     </div>
     <div style="clear: both;"></div>
@@ -55,11 +79,11 @@
     <div id="authStuff">
 
       <div id="printer_shell">
-        <button id="print_button" onClick="printPDF()">Print Sheets</button>
+        <button id="print_button" onclick="printPDF()">Print Sheets</button>
         <pre></pre>
       </div>
 
-      <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+      <button id="authorize_button" onclick="handleAuthClick()">Sign In</button>
       <pre></pre>
       <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
       <pre id="content" style="white-space: pre-wrap;"></pre>

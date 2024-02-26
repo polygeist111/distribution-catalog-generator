@@ -53,3 +53,16 @@ html, body {
   --c7-page-height: 955px;
   /*onload="resizeIframe(this);*/
 }
+
+#modeSelect {
+  legend {
+    color:#ED225D;
+    padding: 3px 6px;
+    /*stroke:white;*/
+    /*background-color:white;*/
+  }
+}
+
+.singleRow {
+  float: left;
+}

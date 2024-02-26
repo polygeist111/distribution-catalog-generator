@@ -72,7 +72,7 @@ let tester;
 Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 by 1056)
 
 */
-
+let modeSelector;
 
 function preload() {
   testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
@@ -105,7 +105,7 @@ function setup() {
   //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
   //button1.mousePressed(startPressed);
   //button1.hide();
-  document.getElementById("confirm_generation").style.visibility = "hidden";
+  document.getElementById("generation_settings").style.visibility = "hidden";
 
   //button2 = createButton('Print Sheets');
   //button2.parent("canvas_shell");
@@ -117,7 +117,13 @@ function setup() {
   document.getElementById('page_list').style.display = "none";
 
 
-  //reStart();
+  currentPage = createGraphics(816, 1056);
+
+  footerGraphic = createGraphics(816, 1056);
+  productGraphic = createGraphics(816, 1056);
+  insertGraphic = createGraphics(816, 1056);
+  priceGraphic = createGraphics(816, 1056);
+
   textFont(regFont);
   noStroke();
   repositionButtons();
@@ -280,7 +286,7 @@ function startPressed() {
   drawing = true;
   pdf.beginRecord();
   //button1.hide();
-  document.getElementById("confirm_generation").style.visibility = "hidden";
+  document.getElementById("generation_settings").style.visibility = "hidden";
 
   repositionButtons();
 }
@@ -313,55 +319,41 @@ function startPressed() {
 //Draws to canvas, snaps and saves all product pages
 //The checks for vectorsOnly don't render anything but insert matter overlay if they fail
 function draw() {
+  //console.log(document.getElementById('generation_settings').style.visibility);
+  if (document.getElementById('generation_settings').style.visibility == "visible") {
+    readGenerationSettings();
+  }
 
   if (!drawing) { 
     background(C7Gray); 
   } else { 
     background(white);
     clear(); 
+    /*
     currentPage = createGraphics(width, height); 
 
     priceGraphic = createGraphics(width, height);
     footerGraphic = createGraphics(width, height);
     productGraphic = createGraphics(width, height);
     insertGraphic = createGraphics(width, height);
+    */
+    currentPage.clear();
+    priceGraphic.clear();
+    footerGraphic.clear();
+    productGraphic.clear();
+    insertGraphic.clear();
 
     //yesOverlays = true; //tied to footer graphic, also includes maker page top right
-    yesOverlays = false;
 
     //yesProducts = true;
-    yesProducts = false;
 
     //yesInserts = true;
-    yesInserts = false;
 
     //yesPrices = true;
-    yesPrices = false;
   }
 
   
-  console.log("current pg: " + width + " " + height);
-  //console.log(printIndex);
-
-  /*
-  if (drawing && wineIndex < wineList.length - 1) {
-    pages();
-    footer(0, 0);
-    pdf.nextPage();
-  } else if (drawing && wineIndex == wineList.length - 1) {
-    pages();
-    footer(0, 0);
-  }
-  if (wineIndex == wineList.length && wineList.length > 0) {
-    pdf.save();
-    noLoop();
-    reStart();
-
-  }
-  */
-  //console.log(pricedWineList[wineIndex + 1][0]);
-  //console.log(lastMaker);
-
+  //console.log("current pg: " + width + " " + height);
 
   //draws all but last page
   if (drawing && printIndex < definitiveLength - 1 && !allDone) {
@@ -429,7 +421,11 @@ function draw() {
     textSize(30);
     textAlign(CENTER);
     if (document.getElementById('authorize_button').innerText == "Refresh") { 
-      text("Press the button to continue", width * 0.5, height * 0.4);
+      push();
+        noStroke();
+        textFont(regFont);
+        text("Press the button to continue", width * 0.5, height * 0.4);
+      pop();
     } else {
       text("Please sign in to Google to continue", width * 0.5, height * 0.4);
     }
@@ -451,23 +447,23 @@ function draw() {
 function compilePage(whichType) {
 
   if (yesInserts) {
-    //currentPage.image(insertGraphic, 0, 0);
+    currentPage.image(insertGraphic, 0, 0);
     console.log("adding insert");
   }
   if (yesProducts) {
-    //currentPage.image(productGraphic, 0, 0);
+    currentPage.image(productGraphic, 0, 0);
     console.log("adding product");
   }
   if (yesOverlays) {
-    //currentPage.image(footerGraphic, 0, 0);
+    currentPage.image(footerGraphic, 0, 0);
     console.log("adding overlay");
   }
   if (yesPrices) {
-    //currentPage.image(priceGraphic, 0, 0);
+    currentPage.image(priceGraphic, 0, 0, width, height);
     console.log("adding this wine price");
   }
 
-  //image(currentPage, 0, 0);
+  image(currentPage, 0, 0);
 
   console.log("writing to screen");
 
@@ -523,7 +519,7 @@ function compilePage(whichType) {
       break;
 
   }
-  console.log("list: " + document.getElementById('page_list').innerHTML);
+  //console.log("list: " + document.getElementById('page_list').innerHTML);
 }
 
 
@@ -542,7 +538,7 @@ function drawFrontMatter() {
   if (printIndex != 0) {
     footer(0, 0);
   }
-  insertGraphic.image(footerGraphic, 0, 0);
+  //insertGraphic.image(footerGraphic, 0, 0);
 
   //image(currentPage, 0, 0);
   //footer(0, 0);
@@ -574,7 +570,7 @@ function drawMakerMatter() {
 
   //fix footers
   footer(0, 392);
-  insertGraphic.image(footerGraphic, 0, 0);
+  //insertGraphic.image(footerGraphic, 0, 0);
 
   //pdf.nextPage();
     
@@ -595,7 +591,7 @@ function drawGeneralBackMatter() {
   } else {
     footer(0, 0);
   }
-  insertGraphic.image(footerGraphic, 0, 0);
+  //insertGraphic.image(footerGraphic, 0, 0);
 
   //pdf.nextPage();
 
@@ -643,7 +639,7 @@ function drawLastBackMatter() {
   } else {
     footer(0, 0);
   }
-  insertGraphic.image(footerGraphic, 0, 0);
+  //insertGraphic.image(footerGraphic, 0, 0);
     
   backIndex++;
 
@@ -758,17 +754,30 @@ function reStart() {
 
   noLoop();
   pdf = createPDF();
+  /*
   currentPage = null;
 
   priceGraphic = null;
   footerGraphic = null;
   productGraphic = null;
   insertGraphic = null;
+  */
+  currentPage.clear();
+  priceGraphic.clear();
+  footerGraphic.clear();
+  productGraphic.clear();
+  insertGraphic.clear();
+
 
   yesOverlays = false;
   yesProducts = false;
   yesInserts = false;
   yesPrices = false;
+
+  document.getElementById('Full Catalog').checked = "true";
+  document.getElementById('priceIncluded').checked = "true";
+  document.getElementById('priceIncluded').disabled = "false";
+  
 
   printedPages = 0;
 
@@ -776,7 +785,7 @@ function reStart() {
 
   populateProducts("start");
   //button1.hide();
-  document.getElementById("confirm_generation").style.visibility = "hidden";
+  document.getElementById("generation_settings").style.visibility = "hidden";
   document.getElementById('printer_shell').style.display = "none";
   document.getElementById('page_list').innerHTML = "";
   document.getElementById('page_list').style.display = "none";
@@ -858,7 +867,10 @@ function loadImages() {
   definitiveLength = pricedWineList.length + frontMatter.length + makers.length + backMatter.length;
   console.log("Definitive Length: " + definitiveLength);
 
-  setTimeout(function() { /*button1.show();*/document.getElementById("confirm_generation").style.visibility = "visible"; }, 2000);
+  setTimeout(function() {
+     document.getElementById("generation_settings").style.visibility = "visible";
+
+  }, 2000);
   
 }
 
@@ -884,6 +896,7 @@ function header(thisWine) {
   productGraphic.textFont(italFont, 20);
   productGraphic.text(thisWine[0].subTitle, 62, 175);
   productGraphic.textFont(regFont);
+  console.log("writing header text");
   
 }
 
@@ -985,9 +998,14 @@ function footer(leftSide, rightSide) {
   footerGraphic.rect(leftSide - 5, 990, rightSide - leftSide + 25, 1025);
 
   //divider line
-  footerGraphic.fill(ArchBlue);
-  footerGraphic.stroke(ArchBlue);
-  footerGraphic.line(leftSide, 1000, rightSide, 1000)
+  //push();
+    //footerGraphic.fill(ArchBlue);
+    //footerGraphic.stroke(ArchBlue);
+    footerGraphic.fill(ArchBlue);
+    footerGraphic.stroke(ArchBlue);
+    footerGraphic.line(leftSide, 1000, rightSide, 1000);
+  //pop();
+
 
   //footer text
   footerGraphic.noStroke();
@@ -997,7 +1015,7 @@ function footer(leftSide, rightSide) {
   footerGraphic.textAlign(LEFT, TOP);
   footerGraphic.text("Archetyp Catalog " + year(), leftSide, 1005);
   //clear();
-
+  
 }
 
 
@@ -1151,16 +1169,28 @@ function priceBox(thisWine) {
   //price box
   priceGraphic.strokeWeight(2);
   priceGraphic.stroke(ArchBlue);
-  priceGraphic.rect(420, 916, 336, 52);
+  priceGraphic.noFill();
+  push();
+    strokeWeight(2);
+    stroke(ArchBlue);
+    noFill();
+    priceGraphic.rect(420, 916, 336, 52);
+  pop();
+  
 
   //priceText
-  priceGraphic.noStroke();
-  priceGraphic.fill(ArchBlue);
-  priceGraphic.textFont(boldFont, 22);
-  priceGraphic.textAlign(CENTER, CENTER);
-  priceGraphic.text(formatPrice(thisWine), 588, 942);
-  priceGraphic.textAlign(LEFT, TOP);
+  
+  push();
+    noStroke();
+    fill(ArchBlue);
+    textFont(boldFont, 22);
+    textAlign(CENTER, CENTER);
+    priceGraphic.text(formatPrice(thisWine), 588, 942);
+    //priceGraphic.textAlign(LEFT, TOP);
+  pop();
+  
   console.log("This wine price: " + formatPrice(thisWine));
+  //image(priceGraphic, 0, 0);
 }
 
 
@@ -1430,6 +1460,10 @@ function repositionButtons() {
   var authStuff = document.getElementById('authStuff');
   var confirmButton = document.getElementById('confirm_generation');
 
+  var modeSelector = document.getElementById('modeSelect'); 
+
+  var priceSelector = document.getElementById('priceIncluded');
+
   //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
   //console.log(document.getElementById("confirm_generation").style.visibility);
   //console.log(document.getElementById("confirm_generation").getBoundingClientRect().height);
@@ -1443,8 +1477,14 @@ function repositionButtons() {
   //confirmButton.style = "top: " + (-1 * canvasRect.top) + "px; left: " + (-1 * canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
   //console.log(confirmButton.getBoundingClientRect());
   //confirmButton.style = "top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2 - canvasRect.top) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2 - canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
-  confirmButton.style = "top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2) + "px; visibility: " + visibility + "; position: absolute;";
+  confirmButton.style = "top: " + (canvasY + canvasRect.height * 0.5 - buttonHeight * 0.5) + "px; left: " + (canvasX + canvasRect.width * 0.5 - buttonWidth * 0.5) + "px; visibility: " + visibility + "; position: absolute;";
   
+  modeSelector.style = "top: " + (canvasY + confirmButton.getBoundingClientRect().bottom - 20) + "px; left: " + (canvasX + canvasRect.width * 0.5 - modeSelector.getBoundingClientRect().width * 0.5) + "px; visibility: " + visibility + "; position: absolute; color:#ED225D;";
+  
+  priceSelector.style = "visibility: visibile; margin-top: 10px;";
+
+  readGenerationSettings();
+
   if (pageListX >= pageListY) {
     authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
   } else {
@@ -1453,6 +1493,77 @@ function repositionButtons() {
   //console.log(confirmButton.style);
   //console.log(confirmButton.getBoundingClientRect());
 }
+
+
+//when called from repositionButtons
+function readGenerationSettings() {
+  var modes = document.getElementById('modeSelect'); 
+  var priceSelector = document.getElementById('priceIncluded');
+  var selectedMode;
+  //console.log(document.getElementById('modeSelect'));
+
+  for (var i = 0; i < modes.length - 1; i++) {
+    if (modes[i].checked) {
+      selectedMode = modes[i].value;
+    }
+  }
+  //console.log("selected mode is " + selectedMode);
+
+  //handles price checkbox availability
+  if (selectedMode != "Overlays") {
+    priceSelector.disabled = false;
+  } else {
+    priceSelector.disabled = true;
+  }
+
+  //handles mode logic
+  switch (selectedMode) {
+    case "Full Catalog":
+      yesOverlays = true;
+      yesInserts = true;
+      yesProducts = true;
+      yesPrices = false;
+      //console.log("mode is full");
+      break;
+    case "Print-Ready Kit":
+      yesOverlays = true;
+      yesInserts = false;
+      yesProducts = true;
+      //console.log("mode is kit");
+      break;
+    case "Tech Sheets":
+      yesOverlays = false;
+      yesInserts = false;
+      yesProducts = true;
+      yesPrices = false; 
+      //console.log("mode is sheets");
+      break;
+    case "Overlays":
+      yesOverlays = true;
+      yesInserts = false;
+      yesProducts = false;
+      yesPrices = false;
+      //console.log("mode is overlay");
+      break;
+    default:
+      reStart();
+      return;
+  }
+
+  //handles price selection, auto-false if mode is overlay
+  if (modes[modes.length - 1].value == "yes") {
+    yesPrices = true;
+  } else {
+    yesPrices = false;
+  }
+  if (priceSelector.disabled == true) {
+    yesPrices = false;  
+  }
+
+
+}
+
+
 
 /*
 
@@ -1472,5 +1583,5 @@ user selection will use a Radio DOM object for mode, and a checkbox DOM object f
 
 
 //Remove button2
-//Assess the dual restart functions, ideally remove one (reStart and wipeOut)
-//InsertMatter currently doesn't include footers or top corners
+//text in graphics bug
+//price checkbox currently has no impact, may be related to other abovc bug
