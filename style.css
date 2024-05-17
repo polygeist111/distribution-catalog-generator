@@ -21,10 +21,22 @@ html, body {
 
 #page_list {
   font-family: "Brandon Grotesque", sans-serif;
-  margin-left: 10px;
+  /*margin-left: 10px;*/
   display: inline-block;
   width: 500px;
   color: white;
+  position: absolute;
+}
+
+#preview_controls {
+  font-family: "Brandon Grotesque", sans-serif;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  color: white;
+  line-height: normal;
 }
 
 #authStuff { 
@@ -39,6 +51,7 @@ html, body {
   color: white;
   font-family: "Brandon Grotesque", sans-serif;
 }
+
 
 @font-face { 
   font-family: "Brandon Grotesque";
@@ -66,3 +79,4 @@ html, body {
 .singleRow {
   float: left;
 }
+

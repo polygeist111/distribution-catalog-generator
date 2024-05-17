@@ -55,7 +55,6 @@ let italFont;
 let bodyMargin = 20;
 
 let definitiveLength = 0;
-  //which page of the print the draw loop is on
 let printIndex = 0;
 let lastMaker = "";
 let makerIndex = 0;
@@ -64,14 +63,7 @@ let allDone = false;
 let printReady = false;
 
 let tester;
-  //whether final list of included print pages is ready
-let confirmed = false;
-  //contains an entry per print page, [bool included, int whichType]
-let pageIncluded = [];
-  //tells draw loop whether to actively display previews or not
-let previewing = false;
-  //current page # (1 indexed) of preview
-let viewingPageNum = 1;
+
 
 //let pageCount = 0;
 
@@ -81,10 +73,6 @@ Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 b
 
 */
 let modeSelector;
-//data structure for each page
-function PageData(fullPage, ) {
-
-}
 
 function preload() {
   testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
@@ -136,11 +124,9 @@ function setup() {
   insertGraphic = createGraphics(816, 1056);
   priceGraphic = createGraphics(816, 1056);
 
-  document.getElementById('preview_controls').style.display = "none";
   textFont(regFont);
   noStroke();
   repositionButtons();
-  windowResized();
 }
 
 
@@ -148,17 +134,13 @@ function setup() {
 //Resizes canvas to fit window
 function windowResized() {
   if (!drawing) {
-    if (window.innerWidth > window.innerHeight) {
-      determiningDim = window.innerHeight;
-    } else {
-      determiningDim = window.innerWidth; 
-    }
+    if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
     //console.log(window.innerWidth + "x" + window.innerHeight + determiningDim);
     resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
     //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
     //button2.position(width * 0.5 - button2.width * 0.5,  height * -0.5 + button2.height * -0.5, "relative");
     document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
-    document.getElementById('holder').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px;";
+
   }
 
   repositionButtons();
@@ -304,7 +286,7 @@ function startPressed() {
   drawing = true;
   pdf.beginRecord();
   //button1.hide();
-  document.getElementById("generation_settings").style.display = "none";
+  document.getElementById("generation_settings").style.visibility = "hidden";
 
   repositionButtons();
 }
@@ -338,58 +320,28 @@ function startPressed() {
 //The checks for vectorsOnly don't render anything but insert matter overlay if they fail
 function draw() {
   //console.log(document.getElementById('generation_settings').style.visibility);
-  //updates user input settings
   if (document.getElementById('generation_settings').style.visibility == "visible") {
     readGenerationSettings();
   }
-  //resizes previewControl div to match sketch container
-  if (document.getElementById('preview_controls').style.display != "none") {
-    canvasObject = document.getElementById('canvas_shell').getBoundingClientRect();
-    //document.getElementById('preview_controls').style = "width: " + (canvasObject.width - 2) + "px; display: inline-block; border: 1px solid white; left: " + 0 + "px; top " + (canvasObject.bottom) + "px;";
-    document.getElementById('preview_controls').style = "width: " + (canvasObject.width - 2) + "px; display: inline-block; border: 1px solid white; line-height: normal;";
-    repositionButtons();
-  }
-  //handles pageList and authStuff format switching based on window width
-  if(document.getElementById('page_list').style.display != "none") {
-    canvasObject = document.getElementById('canvas_shell').getBoundingClientRect();
-    thisPageList = document.getElementById('page_list');
-    //console.log(window.innerWidth + " " + (canvasObject.width + thisPageList.getBoundingClientRect().width + 20));
-    if (window.innerWidth < canvasObject.width + thisPageList.getBoundingClientRect().width + 20) {
-      //thisPageList.style.left = canvasObject.left;
-      //thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
-      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + canvasObject.left + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY + 10)+ "px;";
-      document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8) + "px;";
 
-    } else {
-      //thisPageList.style.left = canvasObject.right;
-      //thisPageList.style.top = canvasObject.top;
-      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + canvasObject.top + "px;";
-      document.getElementById('authStuff').style = "left: " + (canvasObject.left - 10) + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY)+ "px;";
-    }
-
-  }
-
-  if (!drawing && !previewing) { 
-    background(C7Gray);
-    if (allDone && !previewing) {
-      background("green");
-    } 
+  if (!drawing) { 
+    background(C7Gray); 
   } else { 
     background(white);
     clear(); 
-    currentPage = createGraphics(width, height); 
-    currentPage.clear();
     /*
+    currentPage = createGraphics(width, height); 
 
     priceGraphic = createGraphics(width, height);
-    priceGraphic.clear();
     footerGraphic = createGraphics(width, height);
-    footerGraphic.clear();
     productGraphic = createGraphics(width, height);
-    productGraphic.clear();
     insertGraphic = createGraphics(width, height);
-    insertGraphic.clear();
     */
+    currentPage.clear();
+    priceGraphic.clear();
+    footerGraphic.clear();
+    productGraphic.clear();
+    insertGraphic.clear();
 
     //yesOverlays = true; //tied to footer graphic, also includes maker page top right
 
@@ -402,60 +354,55 @@ function draw() {
 
   
   //console.log("current pg: " + width + " " + height);
-  //ensures all preview pages are printed, but only selected pages printed at end
-  if (!confirmed || (confirmed && pageIncluded[printIndex])) {
 
-    //draws all but last page
-    if (drawing && printIndex < definitiveLength - 1 && !allDone) {
-      let whichType = -1;
-      //front matter
-      if (printIndex < frontMatter.length) {
-        
-        //drawFrontMatter();
-        whichType = 1;
-        
-        //maker matter
-      } else if (printIndex == 2) { 
-        //noLoop(); 
-      } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
-        
-        //drawMakerMatter();
-        whichType = 2;
-        
-        //back matter
-      } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
-        
-        //drawGeneralBackMatter();
-        whichType = 3;
-        
-        //tech sheets
-      } else if (wineIndex < pricedWineList.length) {
-        
-        //drawTechSheets();
-        whichType = 4;
-        
-      }
+  //draws all but last page
+  if (drawing && printIndex < definitiveLength - 1 && !allDone) {
+    let whichType = -1;
+    //front matter
+    if (printIndex < frontMatter.length) {
       
-      compilePage(whichType); 
+      drawFrontMatter();
+      whichType = 1;
+
+      //maker matter
+    } else if (printIndex == 2) { 
+      noLoop(); 
+    } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
       
-      printIndex++;
-      //end here
+      drawMakerMatter();
+      whichType = 2;
+
+      //back matter
+    } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
+      
+      drawGeneralBackMatter();
+      whichType = 3;
+
+      //tech sheets
+    } else if (wineIndex < pricedWineList.length) {
+      
+      drawTechSheets();
+      whichType = 4;
+
     }
+
+    compilePage(whichType); 
     
-    
-    //last back matter / last page
-    if (drawing && backIndex == backMatter.length - 1 && !printReady) {
-      
-      //drawLastBackMatter();
-      whichType = 5;
-      compilePage(whichType);
-      
-    }
-  } else if (confirmed && !pageIncluded[printIndex]) {
     printIndex++;
+    //end here
+  } 
+  
+  
+  //last back matter / last page
+  if (drawing && backIndex == backMatter.length - 1 && !printReady) {
+    
+    drawLastBackMatter();
+    whichType = 5;
+    compilePage(whichType);
+    
   }
-    /*
-    //Closing save (after last page)
+  /*
+  //Closing save (after last page)
   if (allDone) {
     pdf.save();
     noLoop();
@@ -465,11 +412,9 @@ function draw() {
 
   }*/
 
-  if (previewing) {
-    previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
-  }
 
-  if (!drawing && !previewing) {
+
+  if (!drawing) {
     document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
     fill('#ED225D');
@@ -500,163 +445,83 @@ function draw() {
 
 
 function compilePage(whichType) {
-  if (!confirmed) {
-    var specialInd = -1;
-    if (whichType == 4) {
-      console.log("winDex " + wineIndex);
-      specialInd = wineIndex;
-    } else if (whichType == 2) {
-      specialInd = makerIndex;
-    } else if (whichType == 3 || whichType == 5) {
-      specialInd = backIndex;
-    }
-    pageIncluded.push([true, whichType, specialInd, -1]);
-  }
 
   if (yesInserts) {
-    //currentPage.image(insertGraphic, 0, 0);
+    currentPage.image(insertGraphic, 0, 0);
     console.log("adding insert");
   }
   if (yesProducts) {
-    //currentPage.image(productGraphic, 0, 0);
+    currentPage.image(productGraphic, 0, 0);
     console.log("adding product");
   }
   if (yesOverlays) {
-    //currentPage.image(footerGraphic, 0, 0);
+    currentPage.image(footerGraphic, 0, 0);
     console.log("adding overlay");
   }
   if (yesPrices) {
-    //currentPage.image(priceGraphic, 0, 0, width, height);
+    currentPage.image(priceGraphic, 0, 0, width, height);
     console.log("adding this wine price");
   }
 
-  //Writes list of generated pages
+  image(currentPage, 0, 0);
+
+  console.log("writing to screen");
+
+  if (!yesOverlays && yesProducts) {
+    if (whichType == 4) {
+      /*if (printedPages - 1 != pricedWineList.length) {
+        pdf.nextPage();
+      }*/
+      pdf.nextPage();
+      printedPages++;
+      console.log("saving product page to pdf");
+    } else {
+      whichType = -1;
+    }
+  } else {
+    if (whichType != 5 ) {
+      pdf.nextPage();
+      console.log("saving page to pdf");
+    } else {
+      console.log("final page to pdf");
+    }
+    printedPages++;
+  }
+
   switch (whichType) {
     case 1:
-      drawFrontMatter();
       if (printIndex != 0) {
         document.getElementById('page_list').innerHTML += ("<br>");
       }
-      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
+      document.getElementById('page_list').innerHTML += "&nbsp;Page " + printedPages + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
       break;
 
     case 2:
-      drawMakerMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
       break;
 
     case 3:
-      drawGeneralBackMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
       break;
       
     case 4:
-      drawTechSheets();
       if (printedPages != 2) {
         document.getElementById('page_list').innerHTML += ("<br>");
       }
-      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title;
+      document.getElementById('page_list').innerHTML += "&nbsp;Page " + printedPages + ": " + pricedWineList[wineIndex - 1][0].title;
       break;
 
     case 5:
-      drawLastBackMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
-      //reveal preview controls
-      document.getElementById('preview_controls').style.display = "inline-block";
-      console.log(pageIncluded);
-      previewing = true;
-      document.getElementById('pageNumIn').max = printIndex + 1;
-      console.log(makerMatter);
-
-      console.log("printing preview controls");
+      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + printedPages + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
       break;
 
     default:
       break;
 
-  }
-
-  //image(currentPage, 0, 0);
-  /*
-  fill('#000000');
-  textSize(30);
-  textAlign(CENTER);
-  text("THIS IS SOME TEXT", width / 2, height / 2);
-  
-*/
-  console.log("writing to screen");
-  //saves to pdf if in confirmation loop
-  if (confirmed && pageIncluded[printedPages][0]) {
-    if (!yesOverlays && yesProducts) {
-      if (whichType == 4) {
-        /*if (printedPages - 1 != pricedWineList.length) {
-          pdf.nextPage();
-        }*/
-        pdf.nextPage();
-        printedPages++;
-        console.log("saving product page to pdf");
-      } else {
-        whichType = -1;
-      }
-    } else {
-      if (whichType != 5 ) {
-        pdf.nextPage();
-        console.log("saving page to pdf");
-      } else {
-        console.log("final page to pdf");
-      }
-      printedPages++;
-    }
   }
   //console.log("list: " + document.getElementById('page_list').innerHTML);
 }
 
-function previewPage(thisPageNum, whichType, specialInd) {
-  //console.log("previewing page " + thisPageNum + " of type " + whichType + " and specialInd " + specialInd);
-  printIndex = thisPageNum - 1;
-  if (whichType == 4) {
-    wineIndex = specialInd;
-  } else if (whichType == 2) {
-    makerIndex = specialInd;
-    wineIndex = pageIncluded[printIndex + 1][2];
-  } else if (whichType == 3 || whichType == 5) {
-    backIndex = specialInd;
-  }
-  switch (whichType) {
-    case 1:
-      drawFrontMatter();
-      break;
-
-    case 2:
-      drawMakerMatter();
-      break;
-
-    case 3:
-      drawGeneralBackMatter();
-      break;
-      
-    case 4:
-      drawTechSheets();
-      break;
-
-    case 5:
-      drawLastBackMatter();
-      break;
-
-    default:
-      break;
-
-  }
-  printIndex = 0;
-  if (whichType == 4) {
-    wineIndex = 0;
-  } else if (whichType == 2) {
-    makerIndex = 0;
-    wineIndex = 0;
-  } else if (whichType == 3 || whichType == 5) {
-    backIndex = 0;
-  }
-}
 
 
 function drawFrontMatter() {
@@ -664,7 +529,7 @@ function drawFrontMatter() {
   if (!vectorsOnly) {
     img = frontMatter[printIndex];
     img = resizeToPrint(img);
-    image(img, 0, 0);
+    insertGraphic.image(img, 0, 0);
   }
   
   //console.log("Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png");
@@ -695,12 +560,12 @@ function drawMakerMatter() {
   var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
   //console.log(lastMaker + " " + imgW + " " + imgH);
   img = resizeToPrint(img);
-  image(img, 0, 0);
+  insertGraphic.image(img, 0, 0);
+
   makerIndex++;
-  var blueIn = pageIncluded[printIndex][3];
-  
+
   //fix top right wine listing
-  makerWineList(img2, blueIn, imgH);
+  makerWineList(img2, imgW, imgH);
   //makerWineList(img, imgW, imgH);
 
   //fix footers
@@ -718,7 +583,7 @@ function drawGeneralBackMatter() {
   let img;
   img = backMatter[backIndex];
   img = resizeToPrint(img);
-  image(img, 0, 0);
+  insertGraphic.image(img, 0, 0);
 
   //fix footers
   if (backIndex < 2) {
@@ -740,7 +605,7 @@ function drawGeneralBackMatter() {
 function drawTechSheets() {
   pages();
   footer(0, 0);
-  //currentPage.image(footerGraphic, 0, 0);
+  productGraphic.image(footerGraphic, 0, 0);
 
   console.log(wineIndex + " " + pricedWineList[wineIndex])
 
@@ -748,10 +613,8 @@ function drawTechSheets() {
   //printIndex--;
   //pdf.nextPage();
   console.log("tech sheet page " + printIndex);
-  //triggers end of cycle if no inserts are printed
-  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1 && !previewing) {
-    //noLoop();
-    drawing = false;
+  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1) {
+    noLoop();
     //printReady = true;
     allDone = true;
     //button2.show();
@@ -768,7 +631,7 @@ function drawLastBackMatter() {
   let img;
   img = backMatter[backIndex];
   img = resizeToPrint(img);
-  image(img, 0, 0);
+  insertGraphic.image(img, 0, 0);
 
   //fix footers
   if (backIndex < 2) {
@@ -777,26 +640,16 @@ function drawLastBackMatter() {
     footer(0, 0);
   }
   //insertGraphic.image(footerGraphic, 0, 0);
-  repositionButtons();
+    
   backIndex++;
 
-  if (!previewing) {
-    //noLoop();
-    drawing = false;
-    //printReady = true;
-    allDone = true;
-    //button2.show();
-    document.getElementById('printer_shell').style.display = 'block'
-    document.getElementById('page_list').style.display = "inline-block";
-  }
   
-  //
-  //
-  //Give option to preview any page
-  //add checkboxing system
-  //or confirm selected pages
-  //
-  //
+  noLoop();
+  //printReady = true;
+  allDone = true;
+  //button2.show();
+  document.getElementById('printer_shell').style.display = 'block'
+  document.getElementById('page_list').style.display = "inline-block";
   repositionButtons();
 }
 
@@ -832,11 +685,11 @@ function formatPrice(thisWine) {
 
 //Iterates through wineList to create product pages (requires Nicole's designs) - consider special case for multiple variants
 function pages() {
-  background("white");
+  productGraphic.background("white");
   var thisWine = pricedWineList[wineIndex];
-  fill('#ED225D');
-  textSize(30);
-  textAlign(CENTER);
+  productGraphic.fill('#ED225D');
+  productGraphic.textSize(30);
+  productGraphic.textAlign(CENTER);
   
   //text(justMakerName(thisWine[0]), width * 0.5, height * 0.3);
   //text(wineIndex, width * 0.5, height * 0.5);
@@ -868,10 +721,8 @@ function pages() {
   bottleShot(thisWine);
 
   header(thisWine);
-  
-  if (yesPrices) {
-    priceBox(thisWine);
-  }
+
+  priceBox(thisWine);
 
   writeBody(thisWine[0]);
 
@@ -964,7 +815,6 @@ function filterPrices(priceIn) {
       //Skips past nonmatching entries
 
       //if an error is thrown in this code, ensure than the file Archetyp Stocklist for Retail/Restaurant (on the TradingPriceConcise page) is appropriately organized
-      console.log(priceIn[winDex][0] + " " + (pricedWineList[i][0].variants[s].sku));
       while (priceIn[winDex][0] != (pricedWineList[i][0].variants[s].sku)) {
         console.log("entered loop");
         winDex++;
@@ -1019,7 +869,7 @@ function loadImages() {
 
   setTimeout(function() {
      document.getElementById("generation_settings").style.visibility = "visible";
-    
+
   }, 2000);
   
 }
@@ -1028,25 +878,24 @@ function loadImages() {
 
 //Generates header
 function header(thisWine) {
-  textStyle(NORMAL);
+  productGraphic.textStyle(NORMAL);
   //header
-  fill(ArchBlue);
-  rect(0, 0, 816, 244);
+  productGraphic.fill(ArchBlue);
+  productGraphic.rect(0, 0, 816, 244);
   
-  fill('#FFFFFF');
-  noStroke();
+  productGraphic.fill(white);
+  productGraphic.noStroke();
   
-  textAlign(LEFT);
+  productGraphic.textAlign(LEFT);
   //textFont("Brandon Grotesque", 24);
-  //currentPage.textFont(boldFont, 28);
-  textFont(regFont, 28);
+  productGraphic.textFont(boldFont, 28);
   let thisVintage = thisWine[0].wine.vintage;
   if (thisVintage == null) { thisVintage = ""; }
-  text(thisVintage, 62, 84);
-  text(makerName(thisWine[0].title), 62, 135);
-  textFont(italFont, 20);
-  text(thisWine[0].subTitle, 62, 175);
-  textFont(regFont);
+  productGraphic.text(thisVintage, 62, 84);
+  productGraphic.text(makerName(thisWine[0].title), 62, 135);
+  productGraphic.textFont(italFont, 20);
+  productGraphic.text(thisWine[0].subTitle, 62, 175);
+  productGraphic.textFont(regFont);
   console.log("writing header text");
   
 }
@@ -1068,7 +917,7 @@ function bottleShot(thisWine) {
     img.height = imgHeight;
   }
   //62,96
-  image(img, 210 - img.width / 2, 280);
+  productGraphic.image(img, 210 - img.width / 2, 280);
 
   //header(thisWine);
 }
@@ -1091,9 +940,8 @@ function writeBody(thisWine) {
   let spacer = "";
   let value = "";
   
-  textSize(14.5);
-  textFont(regFont);
-  fill(ArchBlue);
+  productGraphic.textSize(14.5);
+  productGraphic.textFont(regFont);
   let spaceSize = textWidth(" ");
   /*
   textFont(boldFont);
@@ -1110,11 +958,12 @@ function writeBody(thisWine) {
       thisHeight = top;
     } else { 
       thisHeight = textHeight(value, maxWidth) + 10;
+      //console.log(thisHeight);
     }
     totalHeight += thisHeight;
-    
+
     //assigns key, value, and spacer
-    textFont(boldFont);
+    productGraphic.textFont(boldFont);
     key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
     spacer = "";
     spacerConstant = Math.round(textWidth(thisContent[i].substring(0, thisContent[i].indexOf(":") + 1) + 1) / spaceSize);
@@ -1124,13 +973,13 @@ function writeBody(thisWine) {
     value = spacer + thisContent[i].substring(thisContent[i].indexOf(":") + 1);
 
     //Prints descriptive text
-    textFont(boldFont);
+    productGraphic.textFont(boldFont);
     //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
-    text(key, left, totalHeight, maxWidth, maxHeight);
+    productGraphic.text(key, left, totalHeight, maxWidth, maxHeight);
     
-    textFont(regFont);
+    productGraphic.textFont(regFont);
     //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
-    lastBox = text(value, left, totalHeight, maxWidth, maxHeight);
+    lastBox = productGraphic.text(value, left, totalHeight, maxWidth, maxHeight);
   }
 
 }
@@ -1139,32 +988,32 @@ function writeBody(thisWine) {
 
 //Generates footer
 function footer(leftSide, rightSide) {
-  //console.log("Page num: " + printIndex);
+  console.log("Page num: " + printIndex);
   if (leftSide == 0) { leftSide = 60; }
   if (rightSide == 0) { rightSide = 756; }
 
   //white box (clear potential prior footers)
-  fill("white");
-  noStroke();
-  rect(leftSide - 5, 990, rightSide - leftSide + 25, 1025);
+  footerGraphic.fill("white");
+  footerGraphic.noStroke();
+  footerGraphic.rect(leftSide - 5, 990, rightSide - leftSide + 25, 1025);
 
   //divider line
   //push();
     //footerGraphic.fill(ArchBlue);
     //footerGraphic.stroke(ArchBlue);
-    fill(ArchBlue);
-    stroke(ArchBlue);
-    line(leftSide, 1000, rightSide, 1000);
+    footerGraphic.fill(ArchBlue);
+    footerGraphic.stroke(ArchBlue);
+    footerGraphic.line(leftSide, 1000, rightSide, 1000);
   //pop();
 
 
   //footer text
-  noStroke();
-  textFont(regFont, 12);
-  textAlign(RIGHT, TOP);
-  text(printIndex + 1, rightSide, 1005);
-  textAlign(LEFT, TOP);
-  text("Archetyp Catalog " + year(), leftSide, 1005);
+  footerGraphic.noStroke();
+  footerGraphic.textFont(regFont, 12);
+  footerGraphic.textAlign(RIGHT, TOP);
+  footerGraphic.text(printIndex + 1, rightSide, 1005);
+  footerGraphic.textAlign(LEFT, TOP);
+  footerGraphic.text("Archetyp Catalog " + year(), leftSide, 1005);
   //clear();
   
 }
@@ -1172,42 +1021,37 @@ function footer(leftSide, rightSide) {
 
 
 //Generates wine list on top right of maker pages
-function makerWineList(thisImg, blueIn, thisHeight) {
-  imageMode(CORNER);
+function makerWineList(thisImg, thisWidth, thisHeight) {
+  footerGraphic.imageMode(CORNER);
   thisImg.resize(204, 1056);
+  //image(thisImg, 0, 0);
 
   let thisContent = [];
+
   //identifies box area
   var foundEnd = false;
   var lastBlue = 0;
-  if (blueIn == -1) {
-    while(!foundEnd && lastBlue < thisImg.height) {
-      var color = thisImg.get(203, lastBlue);
-      console.log(color[0] + " " + color[1] + " " + color[2]);
-      if (color[0] != 43 || color[1] != 52 || color[2] != 117) {
-        foundEnd = true;
-      }
-      fill(color);
-      rect(600, lastBlue, 7, 1); 
-      lastBlue++;
-    }
-    lastBlue--;
-    //CODE write lastBlue into pageIncluded
-  } else {
-    lastBlue = blueIn;
+  while(!foundEnd && lastBlue < thisImg.height) {
+    //if (thisImg.get(203, lastBlue))
+    var color = thisImg.get(203, lastBlue);
+    console.log(color[0] + " " + color[1] + " " + color[2]);
+    if (color[0] != 43 || color[1] != 52 || color[2] != 117) {
+      foundEnd = true;
+    } 
+    lastBlue++;
   }
-  pageIncluded[printIndex][3] = lastBlue;
+  lastBlue--;
   console.log("lastBlue = " + lastBlue);
 
   //fills box
-  fill(ArchBlue);
-  rectMode(CORNER);
-  rect(426, 0, 390, lastBlue);
+  footerGraphic.fill(ArchBlue);
+  footerGraphic.rectMode(CORNER);
+  footerGraphic.rect(426, 0, 390, lastBlue);
 
   //fills list of current wines
   
   //adds text
-  textAlign(LEFT, TOP);
+  footerGraphic.textAlign(LEFT, TOP);
   let thisInd = wineIndex;
   while(thisInd < pricedWineList.length && justMakerName(pricedWineList[thisInd][0]) == justMakerName(pricedWineList[wineIndex][0])) {
     console.log(pricedWineList[thisInd][0].seo.title)
@@ -1242,11 +1086,11 @@ function makerWineList(thisImg, blueIn, thisHeight) {
     //sets text block height
     if (lastBox == null) {
       thisHeight = 0;
-      textFont(boldFont, boldFontSize);
+      footerGraphic.textFont(boldFont, boldFontSize);
       value = "Wines"
     } else {
       thisHeight = 0;
-      textFont(regFont, regFontSize);
+      footerGraphic.textFont(regFont, regFontSize);
       value = thisContent[i - 1];
     }
     //if (i == 1) { thisHeight += 5; }
@@ -1285,11 +1129,11 @@ function makerWineList(thisImg, blueIn, thisHeight) {
     //sets text block height
     if (lastBox == null) {
       thisHeight = 0;
-      textFont(boldFont, boldFontSize);
+      footerGraphic.textFont(boldFont, boldFontSize);
       value = "Wines"
     } else {
       thisHeight = 0;
-      textFont(regFont, regFontSize);
+      footerGraphic.textFont(regFont, regFontSize);
       value = thisContent[i - 1];
     }
     
@@ -1314,7 +1158,7 @@ function makerWineList(thisImg, blueIn, thisHeight) {
     //textFont(regFont);
     //text(thisContent[i][1], left, totalHeight, maxWidth, maxHeight);
     console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
-    lastBox = text(value, left, totalHeight - thisHeight, maxWidth, maxHeight);
+    lastBox = footerGraphic.text(value, left, totalHeight - thisHeight, maxWidth, maxHeight);
   }
 }
 
@@ -1323,14 +1167,14 @@ function makerWineList(thisImg, blueIn, thisHeight) {
 //Generates price box
 function priceBox(thisWine) {
   //price box
-  strokeWeight(2);
-  stroke(ArchBlue);
-  noFill();
+  priceGraphic.strokeWeight(2);
+  priceGraphic.stroke(ArchBlue);
+  priceGraphic.noFill();
   push();
     strokeWeight(2);
     stroke(ArchBlue);
     noFill();
-    rect(420, 916, 336, 52);
+    priceGraphic.rect(420, 916, 336, 52);
   pop();
   
 
@@ -1341,7 +1185,7 @@ function priceBox(thisWine) {
     fill(ArchBlue);
     textFont(boldFont, 22);
     textAlign(CENTER, CENTER);
-    text(formatPrice(thisWine), 588, 942);
+    priceGraphic.text(formatPrice(thisWine), 588, 942);
     //priceGraphic.textAlign(LEFT, TOP);
   pop();
   
@@ -1561,7 +1405,6 @@ function loadMatter() {
   console.log
   //loads mid matter (maker profiles)
   for (var i = 0; i < makers.length; i++) {
-    console.log(makers[i]);
     var toPush = (loadImage('InsertedCopy\\MakerMatter_Fall_' + makers[i] + '.png'));
     makerMatter.push(toPush);
   }
@@ -1589,6 +1432,7 @@ function getMakers() {
       makers[i] = makers[i].substring(0, makers[i].indexOf(" ")) + "_" + makers[i].substring(makers[i].indexOf(" ") + 1);
     }
   }
+  console.log(makers);
   
   loadMatter();
 
@@ -1598,7 +1442,6 @@ function getMakers() {
 
 //Repositions buttons in window based on location of canvas and page printout
 function repositionButtons() {
-  
   var thisCanvas = document.getElementById('canvas_shell');
   var canvasRect = thisCanvas.getBoundingClientRect();
   var canvasX = canvasRect.left + window.scrollX;
@@ -1621,8 +1464,6 @@ function repositionButtons() {
 
   var priceSelector = document.getElementById('priceIncluded');
 
-  var previewControls = document.getElementById('preview_controls');
-
   //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
   //console.log(document.getElementById("confirm_generation").style.visibility);
   //console.log(document.getElementById("confirm_generation").getBoundingClientRect().height);
@@ -1642,51 +1483,13 @@ function repositionButtons() {
   
   priceSelector.style = "visibility: visibile; margin-top: 10px;";
 
-  //section for preview controls
-  var viewPrev = document.getElementById("viewPrev");
-  var viewNext = document.getElementById("viewNext");
-  var jumpToPage = document.getElementById("pageNumIn");
-  var previewBox = previewControls.getBoundingClientRect();
-  var jumpBox = jumpToPage.getBoundingClientRect();
-  var previewButtonHeight = 22;
-
-  //viewPrev.style = "width: 10%; height: 45%; top: " +  (previewBox.top + (previewBox.height * 0.5) - (viewPrev.getBoundingClientRect().height * 0.5)) + "px;";
-  var jumpPageTop = viewPrev.getBoundingClientRect().top + window.scrollY - ((jumpBox.height - previewButtonHeight) * 0.5);
-  jumpToPage.style = "width: 20%; margin-left: 10px; margin-right: 10px; left: " + (previewBox.left + (previewBox.width * 0.5) - (jumpBox.width * 0.5)) + "px; height: " + previewButtonHeight + "px; top: " + jumpPageTop + "px; position: absolute;"; 
-  viewPrev.style = "width: 10%; position: absolute; left: " + (jumpBox.left - 10 - viewPrev.getBoundingClientRect().width) + "px; height: " + previewButtonHeight + "px;";
-  viewNext.style = "width: 10%; position: absolute; left: " + (jumpBox.right + 10) + "px; height: " + previewButtonHeight + "px;";
-
-  //viewNext.style = "";
-  //jumpToPage.style = "";
-  //document.getElementById("viewNext").style.width = document.getElementById("viewPrev").getBoundingClientRect().width;
-  //var newWidth = 
-  //console.log(document.getElementById("viewNext").style.width + " " + document.getElementById("viewPrev").getBoundingClientRect().width);
-
-
   readGenerationSettings();
-  /*
+
   if (pageListX >= pageListY) {
-    if (previewControls.style.display != "none") {
-      authStuff.style = "top: " + (previewControls.getBoundingClientRect().bottom + window.scrollY) + "px; margin-top: 10px";
-    } else {
-      authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
-    }
-    console.log("bigX");
+    authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
   } else {
     authStuff.style = "top: " + canvasY + "px; margin-top: 0px; left: " + (canvasRect.right + window.scrollX) + "px;";
-    console.log("littleX");
-  }*/
-  /*
-  console.log(window.width + " " + (canvasRect.width + pageListRect.width + 20));
-  if (window.width < canvasRect.width + pageListRect.width + 20) {
-    thisPageList.style.left = canvasRect.left;
-    thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
-  } else {
-    thisPageList.style.left = canvasRect.right;
-    thisPageList.style.top = canvasRect.top;
-  }*/
-
-  //previewControls.style.width = canvasRect.width;
+  }
   //console.log(confirmButton.style);
   //console.log(confirmButton.getBoundingClientRect());
 }
@@ -1748,7 +1551,6 @@ function readGenerationSettings() {
   }
 
   //handles price selection, auto-false if mode is overlay
-  //console.log(modes[modes.length - 1].value);
   if (modes[modes.length - 1].value == "yes") {
     yesPrices = true;
   } else {
@@ -1758,41 +1560,6 @@ function readGenerationSettings() {
     yesPrices = false;  
   }
 
-
-}
-
-function viewPreviousPage() {
-  console.log("viewing previous page");
-  var pageIn = document.querySelector("#pageNumIn");
-  viewingPageNum--; 
-  if (viewingPageNum < 1) {
-    viewingPageNum = definitiveLength;
-  }
-  pageIn.value = viewingPageNum;
-}
-
-function viewNextPage() {
-  console.log("viewing next page");
-  var pageIn = document.querySelector("#pageNumIn");
-  viewingPageNum++; 
-  if (viewingPageNum > definitiveLength) {
-    viewingPageNum = 1;
-  }
-  pageIn.value = viewingPageNum;
-}
-
-function jumpToPageView() {
-  var pageIn = document.querySelector("#pageNumIn");
-  var input = pageIn.value;
-  if (input > definitiveLength) {
-    input = definitiveLength;
-  }
-  if (input < 1) {
-    input = 1;
-  }
-  pageIn.value = input;
-  viewingPageNum = input
-  //console.log("jumping to page " + viewingPageNum + " via input " + input);
 
 }
 
