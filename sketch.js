@@ -531,6 +531,7 @@ function compilePage(whichType) {
   }
 
   //Writes list of generated pages
+  /*
   switch (whichType) {
     case 1:
       drawFrontMatter();
@@ -561,6 +562,52 @@ function compilePage(whichType) {
     case 5:
       drawLastBackMatter();
       document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
+      //reveal preview controls
+      document.getElementById('preview_controls').style.display = "inline-block";
+      console.log(pageIncluded);
+      previewing = true;
+      document.getElementById('pageNumIn').max = printIndex + 1;
+      console.log(makerMatter);
+
+      console.log("printing preview controls");
+      break;
+
+    default:
+      break;
+
+  }*/
+  switch (whichType) {
+    case 1:
+      drawFrontMatter();
+      /*
+      if (printIndex != 0) {
+        document.getElementById('page_list').innerHTML += ("<br>");
+      }*/
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png", 1);
+      break;
+
+    case 2:
+      drawMakerMatter();
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png", 2);
+      break;
+
+    case 3:
+      drawGeneralBackMatter();
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png", 3);
+      break;
+      
+    case 4:
+      drawTechSheets();
+      /*
+      if (printedPages != 2) {
+        document.getElementById('page_list').innerHTML += ("<br>");
+      }*/
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title, 4);
+      break;
+
+    case 5:
+      drawLastBackMatter();
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png", 5);
       //reveal preview controls
       document.getElementById('preview_controls').style.display = "inline-block";
       console.log(pageIncluded);
@@ -1761,6 +1808,9 @@ function readGenerationSettings() {
 
 }
 
+
+
+//moves preview screen back a page
 function viewPreviousPage() {
   console.log("viewing previous page");
   var pageIn = document.querySelector("#pageNumIn");
@@ -1771,6 +1821,9 @@ function viewPreviousPage() {
   pageIn.value = viewingPageNum;
 }
 
+
+
+//moves preview screen forward a page
 function viewNextPage() {
   console.log("viewing next page");
   var pageIn = document.querySelector("#pageNumIn");
@@ -1781,6 +1834,9 @@ function viewNextPage() {
   pageIn.value = viewingPageNum;
 }
 
+
+
+//jumps preview screen to input page
 function jumpToPageView() {
   var pageIn = document.querySelector("#pageNumIn");
   var input = pageIn.value;
@@ -1796,6 +1852,79 @@ function jumpToPageView() {
 
 }
 
+
+
+//takes pageList text as input and creates new line with checkbox and text
+function makeCheckbox(label, whichType) {
+  var pageList = document.getElementById("page_list");
+
+  //create "Select All" checkbox
+  if (!pageList.hasChildNodes()) {
+    var selectAllDiv = document.createElement("div");
+    selectAllDiv.id = "selectAllDiv";
+    pageList.appendChild(selectAllDiv);
+    
+    var selectAllCheckbox = document.createElement("input");
+    selectAllCheckbox.type = "checkbox";
+    selectAllCheckbox.id = "selectAllCheckbox";
+    selectAllCheckbox.name = "selectAllCheckbox";
+    selectAllCheckbox.checked = true
+    selectAllDiv.appendChild(selectAllCheckbox);
+
+    var selectAllLabel = document.createElement("label");
+    selectAllLabel.htmlFor = "selectAllCheckbox";
+    selectAllLabel.innerHTML = "Select All";
+    selectAllDiv.appendChild(selectAllLabel);
+  }
+
+
+  var newCheckboxDiv = document.createElement("div");
+  newCheckboxDiv.id = "initialPage" + (printIndex + 1) + "Selector";
+  pageList.appendChild(newCheckboxDiv);
+
+  //add sectional checkbox
+  if(
+    (//first front matter
+    whichType == 1 && printIndex == 0) ||
+    (//maker matter
+    whichType == 2) ||
+    (//first back matter
+    whichType == 3 && pageIncluded[printIndex][2] == 0)
+    ) {
+      
+    var newCheckbox = document.createElement("input");
+    newCheckbox.type = "checkbox";
+    newCheckbox.id = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
+    newCheckbox.name = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
+    newCheckbox.checked = true;
+    newCheckboxDiv.appendChild(newCheckbox);
+  } else {
+    //newCheckboxDiv.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    var newSpacerDiv = document.createElement("div");
+        newSpacerDiv.id = "initialPage" + (printIndex + 1) + "Spacer";
+        newSpacerDiv.style = "width: 20px; height: 13px; display: inline-block;";
+        newCheckboxDiv.appendChild(newSpacerDiv);
+  }
+
+  var newCheckbox = document.createElement("input");
+  newCheckbox.type = "checkbox";
+  newCheckbox.id = "initialPage" + (printIndex + 1) + "Checkbox";
+  newCheckbox.name = "initialPage" + (printIndex + 1) + "Checkbox";
+  newCheckbox.checked = true;
+  newCheckboxDiv.appendChild(newCheckbox);
+
+  var newCheckboxLabel = document.createElement("label");
+  newCheckboxLabel.htmlFor = "initialPage" + (printIndex + 1) + "Checkbox";
+  newCheckboxLabel.innerHTML = label;
+  newCheckboxDiv.appendChild(newCheckboxLabel);
+
+
+
+
+
+  //emplaces reference to div with checkbox and text into fifth place of pageIncluded array
+  pageIncluded[printIndex].push(newCheckboxDiv);
+}
 
 
 /*
