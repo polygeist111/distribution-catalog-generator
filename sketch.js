@@ -19,7 +19,7 @@ let allInsertOverlays = [];
 
   //index within pricedWineList
 let wineIndex = 0;
-let drawing = false; //replace with state enum
+//let drawing = false; //replace with state enum
 
   //container for saved pages
 var pdf;
@@ -59,15 +59,15 @@ let lastMaker = "";
 let makerIndex = 0;
   //index within backMatter
 let backIndex = 0;
-let allDone = false;  //replace with state enum
-let printReady = false;  //replace with state enum
+//let allDone = false;  //replace with state enum
+//let printReady = false;  //replace with state enum
 
   //whether final list of included print pages is ready
-let confirmed = false;  //replace with state enum
+//let confirmed = false;  //replace with state enum
   //contains an entry per print page, [bool included, int whichType]
 let pageIncluded = [];
   //tells draw loop whether to actively display previews or not
-let previewing = false;  //replace with state enum
+//let previewing = false;  //replace with state enum
   //current page # (1 indexed) of preview
 let viewingPageNum = 1;
 
@@ -120,15 +120,15 @@ function setup() {
   document.getElementById('preview_controls').style.display = "none";
   textFont(regFont);
   noStroke();
-  //repositionButtons();
   windowResized();
+  state = States.SETUP;
 }
 
 
 
 //Resizes canvas to fit window
 function windowResized() {
-  if (!drawing && !previewing) {
+  if (state == States.SETUP) {
     if (window.innerWidth > window.innerHeight) {
       determiningDim = window.innerHeight;
     } else {
@@ -282,7 +282,7 @@ function startPressed() {
   resizeCanvas(816, 1056);
   document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
-  drawing = true;
+  state = States.COMPILING;
   pdf.beginRecord();
   //button1.hide();
   document.getElementById("generation_settings").style.display = "none";
@@ -349,15 +349,12 @@ function draw() {
     }
 
   }
-
-  if (!drawing && !previewing) { 
+  console.log(state);
+  if (state == States.SETUP) { 
     background(C7Gray);
-    if (allDone && !previewing) {
-      background("green");
-    } 
   } else { 
     background(white);
-    clear(); 
+    //clear(); 
 
     //yesOverlays = true; //tied to footer graphic, also includes maker page top right
 
@@ -369,48 +366,46 @@ function draw() {
   }
 
   
-  //console.log("current pg: " + width + " " + height);
-  //ensures all preview pages are printed, but only selected pages printed at end
-  if (!confirmed || (confirmed && pageIncluded[printIndex])) {
-
+  //compiles all initial pages
+  if (state == States.COMPILING) {
     //draws all but last page
-    if (drawing && printIndex < definitiveLength - 1 && !allDone) {
+    //if (drawing && printIndex < definitiveLength - 1 && !allDone) {
       let whichType = -1;
       //front matter
       if (printIndex < frontMatter.length) {
-        
         //drawFrontMatter();
         whichType = 1;
-        
+      
         //maker matter
       } else if (printIndex == 2) { 
         //noLoop(); 
       } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
-        
         //drawMakerMatter();
         whichType = 2;
         
         //back matter
       } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
-        
         //drawGeneralBackMatter();
         whichType = 3;
         
         //tech sheets
       } else if (wineIndex < pricedWineList.length) {
-        
         //drawTechSheets();
         whichType = 4;
         
+        //last back matter
+      } else if (wineIndex == pricedWineList.length && backIndex == backMatter.length - 1) {
+        whichType = 5;
       }
       
       compilePage(whichType); 
-      
-      printIndex++;
+      if (whichType != 5) {
+        printIndex++;
+      }
       //end here
-    }
+    //}
     
-    
+    /*
     //last back matter / last page
     if (drawing && backIndex == backMatter.length - 1 && !printReady) {
       
@@ -418,9 +413,7 @@ function draw() {
       whichType = 5;
       compilePage(whichType);
       
-    }
-  } else if (confirmed && !pageIncluded[printIndex]) {
-    printIndex++;
+    }*/
   }
     /*
     //Closing save (after last page)
@@ -433,11 +426,11 @@ function draw() {
 
   }*/
 
-  if (previewing) {
+  if (state == States.PREVIEWING) {
     previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
   }
 
-  if (!drawing && !previewing) {
+  if (state == States.SETUP) {
     document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
     fill('#ED225D');
@@ -468,7 +461,7 @@ function draw() {
 
 
 function compilePage(whichType) {
-  if (!confirmed) {
+  if (state == States.COMPILING) {
     var specialInd = -1;
     if (whichType == 4) {
       console.log("winDex " + wineIndex);
@@ -575,7 +568,7 @@ function compilePage(whichType) {
       //reveal preview controls
       document.getElementById('preview_controls').style.display = "inline-block";
       console.log(pageIncluded);
-      previewing = true;
+      //state = States.PREVIEWING
       document.getElementById('pageNumIn').max = printIndex + 1;
       console.log(makerMatter);
 
@@ -586,15 +579,12 @@ function compilePage(whichType) {
       break;
 
   }
-
+  /*
   console.log("writing to screen");
   //saves to pdf if in confirmation loop
-  if (confirmed && pageIncluded[printedPages][0]) {
+  if (state == States.ASSEMBLING && pageIncluded[printedPages][0]) {
     if (!yesOverlays && yesProducts) {
       if (whichType == 4) {
-        /*if (printedPages - 1 != pricedWineList.length) {
-          pdf.nextPage();
-        }*/
         pdf.nextPage();
         printedPages++;
         console.log("saving product page to pdf");
@@ -610,7 +600,7 @@ function compilePage(whichType) {
       }
       printedPages++;
     }
-  }
+  }*/
   //console.log("list: " + document.getElementById('page_list').innerHTML);
 }
 
@@ -741,11 +731,9 @@ function drawTechSheets() {
   //pdf.nextPage();
   console.log("tech sheet page " + printIndex);
   //triggers end of cycle if no inserts are printed
-  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1 && !previewing) {
+  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1 && state != States.PREVIEWING) {
     //noLoop();
-    drawing = false;
-    //printReady = true;
-    allDone = true;
+    state = States.PREVIEWING;
     //button2.show();
     document.getElementById('printer_shell').style.display = 'block'
     document.getElementById('page_list').style.display = "inline-block";
@@ -771,11 +759,9 @@ function drawLastBackMatter() {
   repositionButtons();
   backIndex++;
 
-  if (!previewing) {
+  if (state != States.PREVIEWING) { //possible unnecessary if statement
     //noLoop();
-    drawing = false;
-    //printReady = true;
-    allDone = true;
+    state = States.PREVIEWING;
     //button2.show();
     document.getElementById('printer_shell').style.display = 'block'
     document.getElementById('page_list').style.display = "inline-block";
@@ -885,7 +871,7 @@ function reStart() {
   allInsertOverlays = [];
 
   wineIndex = 0;
-  drawing = false;
+  state = States.SETUP;
 
   //if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
@@ -904,26 +890,24 @@ function reStart() {
   document.getElementById('priceIncluded').checked = "true";
   document.getElementById('priceIncluded').disabled = "false";
   
-
   printedPages = 0;
 
   vectorsOnly = false;
 
   populateProducts("start");
-  //button1.hide();
   document.getElementById("generation_settings").style.visibility = "hidden";
   document.getElementById('printer_shell').style.display = "none";
   document.getElementById('page_list').innerHTML = "";
   document.getElementById('page_list').style.display = "none";
-  console.log("reStarted");
-
+  
   definitiveLength = 0;
   printIndex = 0;
   lastMaker = "";
   makerIndex = 0;
   backIndex = 0;
-  allDone = false;
-  printReady = false;
+
+  console.log("reStarted");
+
   repositionButtons();
 }
 
