@@ -70,6 +70,8 @@ let pageIncluded = [];
 //let previewing = false;  //replace with state enum
   //current page # (1 indexed) of preview
 let viewingPageNum = 1;
+  //index of the last page to be printed
+let lastToPrint = -1;
 
 //let pageCount = 0;
 
@@ -349,7 +351,7 @@ function draw() {
     }
 
   }
-  console.log(state);
+  //console.log(state);
   if (state == States.SETUP) { 
     background(C7Gray);
   } else { 
@@ -402,18 +404,6 @@ function draw() {
       if (whichType != 5) {
         printIndex++;
       }
-      //end here
-    //}
-    
-    /*
-    //last back matter / last page
-    if (drawing && backIndex == backMatter.length - 1 && !printReady) {
-      
-      //drawLastBackMatter();
-      whichType = 5;
-      compilePage(whichType);
-      
-    }*/
   }
     /*
     //Closing save (after last page)
@@ -428,6 +418,43 @@ function draw() {
 
   if (state == States.PREVIEWING) {
     previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+  }
+
+  if (state == States.ASSEMBLING) {
+    if (lastToPrint == -1) {
+      reStart();
+    }
+    //skips to next page to be printed
+    while (!pageIncluded[viewingPageNum - 1][0] && viewingPageNum <= lastToPrint) {
+      viewingPageNum++;
+      if (viewingPageNum >= (lastToPrint + 1)) {
+        break;
+      }
+      console.log(viewingPageNum + " " + (lastToPrint + 1));
+    } 
+    if (viewingPageNum < (lastToPrint + 1)) {
+      printedPages++;
+      previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+      viewingPageNum++;
+      pdf.nextPage();
+      //pdf is done
+    } else {
+      printedPages++;
+      previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+      console.log("exit draw to print");
+      /*
+      for(var i = 0; i < 10000; i++) {
+        console.log();
+      }*/
+      //printPDF();
+      setTimeout(function() {
+        printPDF();
+      }, 500);
+      noLoop();
+      /*
+      sleep(501);*/
+    }
+
   }
 
   if (state == States.SETUP) {
@@ -488,64 +515,15 @@ function compilePage(whichType) {
   }
 
   //Writes list of generated pages
-  /*
   switch (whichType) {
     case 1:
       drawFrontMatter();
-      if (printIndex != 0) {
-        document.getElementById('page_list').innerHTML += ("<br>");
-      }
-      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png";
-      break;
-
-    case 2:
-      drawMakerMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png";
-      break;
-
-    case 3:
-      drawGeneralBackMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
-      break;
-      
-    case 4:
-      drawTechSheets();
-      if (printedPages != 2) {
-        document.getElementById('page_list').innerHTML += ("<br>");
-      }
-      document.getElementById('page_list').innerHTML += "&nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title;
-      break;
-
-    case 5:
-      drawLastBackMatter();
-      document.getElementById('page_list').innerHTML += "<br> &nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png";
-      //reveal preview controls
-      document.getElementById('preview_controls').style.display = "inline-block";
-      console.log(pageIncluded);
-      previewing = true;
-      document.getElementById('pageNumIn').max = printIndex + 1;
-      console.log(makerMatter);
-
-      console.log("printing preview controls");
-      break;
-
-    default:
-      break;
-
-  }*/
-  switch (whichType) {
-    case 1:
-      drawFrontMatter();
-      /*
-      if (printIndex != 0) {
-        document.getElementById('page_list').innerHTML += ("<br>");
-      }*/
       makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png", 1);
       break;
 
     case 2:
       drawMakerMatter();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex] + ".png", 2);
+      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex - 1] + ".png", 2);
       break;
 
     case 3:
@@ -555,10 +533,6 @@ function compilePage(whichType) {
       
     case 4:
       drawTechSheets();
-      /*
-      if (printedPages != 2) {
-        document.getElementById('page_list').innerHTML += ("<br>");
-      }*/
       makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title, 4);
       break;
 
@@ -603,6 +577,8 @@ function compilePage(whichType) {
   }*/
   //console.log("list: " + document.getElementById('page_list').innerHTML);
 }
+
+
 
 function previewPage(thisPageNum, whichType, specialInd) {
   //console.log("previewing page " + thisPageNum + " of type " + whichType + " and specialInd " + specialInd);
@@ -906,6 +882,8 @@ function reStart() {
   makerIndex = 0;
   backIndex = 0;
 
+  lastToPrint = 0;
+
   console.log("reStarted");
 
   repositionButtons();
@@ -949,22 +927,43 @@ function filterPrices(priceIn) {
 
 
 
+//sets off assembly loop
+function preparePDF() {
+  state = States.ASSEMBLING;
+  var previewControls = document.getElementById('preview_controls');
+  previewControls.style.display = "none";
+  document.getElementById('page_list').style.display = "none";
+  while(previewControls.firstChild) {
+    previewControls.removeChild(previewControls.firstChild);
+  }
+  viewingPageNum = 1;
+
+  var temp = definitiveLength - 1;
+  while (!pageIncluded[temp][0]) {
+    temp--;
+  }
+  lastToPrint = temp;
+  console.log("Last to print: " + lastToPrint);
+}
+
+
+
 //Confirms pdf print, called from html
 function printPDF() {  
-  console.log("printing");
-  console.log("Full PDF Contents: ");
-  console.log(pageIncluded);
-  /*
-  console.log(pdf);
-  if (!yesOverlays && yesProducts) {
-    //pdf.endRecord();
-  }
+  if (state == States.ASSEMBLING) {
+    console.log("printing");
+    console.log("Full PDF Contents: ");
+    console.log(pageIncluded);
+    console.log(pdf);
+    //if (!yesOverlays && yesProducts) {}
+    pdf.endRecord();
     pdf.save();
-  
-  noLoop();
-  allDone = false
-  printReady = false;
-  reStart();*/
+    
+    noLoop();
+    reStart();
+  } else {
+    console.log("Repeated call to printPDF");
+  }
 }
 
 
@@ -1118,7 +1117,13 @@ function footer(leftSide, rightSide) {
   noStroke();
   textFont(regFont, 12);
   textAlign(RIGHT, TOP);
-  text(printIndex + 1, rightSide, 1005);
+  if (state == States.COMPILING || state == States.PREVIEWING) {
+    text(printIndex + 1, rightSide, 1005);
+    console.log("preview page # " + (printIndex + 1));
+  } else if (state == States.ASSEMBLING) {
+    text(printedPages, rightSide, 1005);    
+    console.log("Assembled page # " + printedPages);
+  }
   textAlign(LEFT, TOP);
   text("Archetyp Catalog " + year(), leftSide, 1005);
   //clear();
@@ -1887,7 +1892,7 @@ function changeSingleChecked(e) {
     //maker matter sectional checkbox
   } else if (targetType == 2 || targetType == 4) {
     var tempInd = targetIndex;
-    while (!(pageIncluded[tempInd - 1][1] == 4 && pageIncluded[tempInd][1] == 2)) {
+    while (!(pageIncluded[tempInd - 1][1] == 4 && pageIncluded[tempInd][1] == 2) && pageIncluded[tempInd - 1][1] != 1) {
       tempInd--;
     }
     //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
@@ -1957,6 +1962,16 @@ function changeAllChecked(e) {
 }
 
 
+
+//creates blocking program delay
+// from https://www.sitepoint.com/delay-sleep-pause-wait/
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
 
 /*
 
