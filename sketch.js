@@ -17,16 +17,12 @@ let backMatter = [];
 let makers = [];
 let allInsertOverlays = [];
 
+  //index within pricedWineList
 let wineIndex = 0;
-let drawing = false;
+let drawing = false; //replace with state enum
 
+  //container for saved pages
 var pdf;
-var currentPage;
-
-var footerGraphic;
-var productGraphic;
-var insertGraphic;
-var priceGraphic;
 
 var yesOverlays = false; //tied to footer graphic, also includes maker page top right
 var yesProducts = false;
@@ -35,8 +31,7 @@ var yesPrices = false;
 
 var printedPages = 0;
 
-
-var vectorsOnly = false;
+var vectorsOnly = false; //likely unnecessary, check back after fixing mode selector
 
 let determiningDim;
 
@@ -44,32 +39,35 @@ let ArchBlue = '#2B3475';
 let C7Gray = "#222a30";
 let white = '#FFFFFF';
 
+//Bottle shot parameters?
 let imgWidth = 170;
 let imgHeight = 691;
 
+//variants of Brandon Grotesque font
 let testFont;
 let regFont;
 let boldFont;
 let italFont;
 
 let bodyMargin = 20;
-
+  //final # of initial pages pre-checkboxing
 let definitiveLength = 0;
   //which page of the print the draw loop is on
 let printIndex = 0;
 let lastMaker = "";
+  //index within makerMatter
 let makerIndex = 0;
+  //index within backMatter
 let backIndex = 0;
-let allDone = false;
-let printReady = false;
+let allDone = false;  //replace with state enum
+let printReady = false;  //replace with state enum
 
-let tester;
   //whether final list of included print pages is ready
-let confirmed = false;
+let confirmed = false;  //replace with state enum
   //contains an entry per print page, [bool included, int whichType]
 let pageIncluded = [];
   //tells draw loop whether to actively display previews or not
-let previewing = false;
+let previewing = false;  //replace with state enum
   //current page # (1 indexed) of preview
 let viewingPageNum = 1;
 
@@ -80,11 +78,17 @@ let viewingPageNum = 1;
 Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 by 1056)
 
 */
+  //reference to modeSelect html form
 let modeSelector;
-//data structure for each page
-function PageData(fullPage, ) {
 
-}
+//enum for draw states, to be implemented to replace AllDone, Confirmed, Previewing, and related bools
+const States = {
+  SETUP: 0,
+  COMPILING: 1,
+  PREVIEWING: 2,
+  ASSEMBLING: 3
+};
+var state = 0;
 
 function preload() {
   testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
@@ -106,40 +110,17 @@ function setup() {
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8, SVG);
   document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
-  //document.getElementById("defaultCanvas").parent = document.getElementById('canvas_shell');
   document.getElementById('canvas_shell').appendChild(document.getElementById("defaultCanvas"));
-  //canvas.parent("canvas_shell");
-  //document.getElementById('canvas_shell').appendChild(canvas);
 
-  //button1 = createButton('Generate Sheets');
-  //button1.parent("canvas_shell");
-  //button1 = document.getElementById("confirm_generation");
-  //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
-  //button1.mousePressed(startPressed);
-  //button1.hide();
   document.getElementById("generation_settings").style.visibility = "hidden";
-
-  //button2 = createButton('Print Sheets');
-  //button2.parent("canvas_shell");
-  //button2.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
-  //button2.mousePressed(printPDF);
-  //button2.hide();
 
   document.getElementById('printer_shell').style.display = "none";
   document.getElementById('page_list').style.display = "none";
 
-
-  currentPage = createGraphics(816, 1056);
-
-  footerGraphic = createGraphics(816, 1056);
-  productGraphic = createGraphics(816, 1056);
-  insertGraphic = createGraphics(816, 1056);
-  priceGraphic = createGraphics(816, 1056);
-
   document.getElementById('preview_controls').style.display = "none";
   textFont(regFont);
   noStroke();
-  repositionButtons();
+  //repositionButtons();
   windowResized();
 }
 
@@ -147,7 +128,7 @@ function setup() {
 
 //Resizes canvas to fit window
 function windowResized() {
-  if (!drawing) {
+  if (!drawing && !previewing) {
     if (window.innerWidth > window.innerHeight) {
       determiningDim = window.innerHeight;
     } else {
@@ -358,12 +339,12 @@ function draw() {
       //thisPageList.style.left = canvasObject.left;
       //thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
       document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + canvasObject.left + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY + 10)+ "px;";
-      document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8) + "px;";
+      document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8 + window.scrollY) + "px;";
 
     } else {
       //thisPageList.style.left = canvasObject.right;
       //thisPageList.style.top = canvasObject.top;
-      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + canvasObject.top + "px;";
+      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + (canvasObject.top + window.scrollY) + "px;";
       document.getElementById('authStuff').style = "left: " + (canvasObject.left - 10) + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY)+ "px;";
     }
 
@@ -377,19 +358,6 @@ function draw() {
   } else { 
     background(white);
     clear(); 
-    currentPage = createGraphics(width, height); 
-    currentPage.clear();
-    /*
-
-    priceGraphic = createGraphics(width, height);
-    priceGraphic.clear();
-    footerGraphic = createGraphics(width, height);
-    footerGraphic.clear();
-    productGraphic = createGraphics(width, height);
-    productGraphic.clear();
-    insertGraphic = createGraphics(width, height);
-    insertGraphic.clear();
-    */
 
     //yesOverlays = true; //tied to footer graphic, also includes maker page top right
 
@@ -512,21 +480,17 @@ function compilePage(whichType) {
     }
     pageIncluded.push([true, whichType, specialInd, -1]);
   }
-
+  //CODE: this section is likely useless
   if (yesInserts) {
-    //currentPage.image(insertGraphic, 0, 0);
     console.log("adding insert");
   }
   if (yesProducts) {
-    //currentPage.image(productGraphic, 0, 0);
     console.log("adding product");
   }
   if (yesOverlays) {
-    //currentPage.image(footerGraphic, 0, 0);
     console.log("adding overlay");
   }
   if (yesPrices) {
-    //currentPage.image(priceGraphic, 0, 0, width, height);
     console.log("adding this wine price");
   }
 
@@ -623,14 +587,6 @@ function compilePage(whichType) {
 
   }
 
-  //image(currentPage, 0, 0);
-  /*
-  fill('#000000');
-  textSize(30);
-  textAlign(CENTER);
-  text("THIS IS SOME TEXT", width / 2, height / 2);
-  
-*/
   console.log("writing to screen");
   //saves to pdf if in confirmation loop
   if (confirmed && pageIncluded[printedPages][0]) {
@@ -720,13 +676,6 @@ function drawFrontMatter() {
   if (printIndex != 0) {
     footer(0, 0);
   }
-  //insertGraphic.image(footerGraphic, 0, 0);
-
-  //image(currentPage, 0, 0);
-  //footer(0, 0);
-
-  //pdf.nextPage();
-
   console.log("front page " + printIndex);
 }
 
@@ -752,7 +701,6 @@ function drawMakerMatter() {
 
   //fix footers
   footer(0, 392);
-  //insertGraphic.image(footerGraphic, 0, 0);
 
   //pdf.nextPage();
     
@@ -773,7 +721,6 @@ function drawGeneralBackMatter() {
   } else {
     footer(0, 0);
   }
-  //insertGraphic.image(footerGraphic, 0, 0);
 
   //pdf.nextPage();
 
@@ -787,8 +734,6 @@ function drawGeneralBackMatter() {
 function drawTechSheets() {
   pages();
   footer(0, 0);
-  //currentPage.image(footerGraphic, 0, 0);
-
   console.log(wineIndex + " " + pricedWineList[wineIndex])
 
   //wineIndex--;
@@ -823,7 +768,6 @@ function drawLastBackMatter() {
   } else {
     footer(0, 0);
   }
-  //insertGraphic.image(footerGraphic, 0, 0);
   repositionButtons();
   backIndex++;
 
@@ -950,20 +894,6 @@ function reStart() {
 
   noLoop();
   pdf = createPDF();
-  /*
-  currentPage = null;
-
-  priceGraphic = null;
-  footerGraphic = null;
-  productGraphic = null;
-  insertGraphic = null;
-  */
-  currentPage.clear();
-  priceGraphic.clear();
-  footerGraphic.clear();
-  productGraphic.clear();
-  insertGraphic.clear();
-
 
   yesOverlays = false;
   yesProducts = false;
@@ -1039,6 +969,8 @@ function filterPrices(priceIn) {
 function printPDF() {  
   console.log("printing");
   console.log("Full PDF Contents: ");
+  console.log(pageIncluded);
+  /*
   console.log(pdf);
   if (!yesOverlays && yesProducts) {
     //pdf.endRecord();
@@ -1048,7 +980,7 @@ function printPDF() {
   noLoop();
   allDone = false
   printReady = false;
-  reStart();
+  reStart();*/
 }
 
 
@@ -1084,8 +1016,6 @@ function header(thisWine) {
   noStroke();
   
   textAlign(LEFT);
-  //textFont("Brandon Grotesque", 24);
-  //currentPage.textFont(boldFont, 28);
   textFont(regFont, 28);
   let thisVintage = thisWine[0].wine.vintage;
   if (thisVintage == null) { thisVintage = ""; }
@@ -1196,14 +1126,9 @@ function footer(leftSide, rightSide) {
   rect(leftSide - 5, 990, rightSide - leftSide + 25, 1025);
 
   //divider line
-  //push();
-    //footerGraphic.fill(ArchBlue);
-    //footerGraphic.stroke(ArchBlue);
-    fill(ArchBlue);
-    stroke(ArchBlue);
-    line(leftSide, 1000, rightSide, 1000);
-  //pop();
-
+  fill(ArchBlue);
+  stroke(ArchBlue);
+  line(leftSide, 1000, rightSide, 1000);
 
   //footer text
   noStroke();
@@ -1389,11 +1314,9 @@ function priceBox(thisWine) {
     textFont(boldFont, 22);
     textAlign(CENTER, CENTER);
     text(formatPrice(thisWine), 588, 942);
-    //priceGraphic.textAlign(LEFT, TOP);
   pop();
   
   console.log("This wine price: " + formatPrice(thisWine));
-  //image(priceGraphic, 0, 0);
 }
 
 
@@ -1810,6 +1733,14 @@ function readGenerationSettings() {
 
 
 
+/*
+*
+* PREVIEW INPUT HANDLING
+*
+*/
+
+
+
 //moves preview screen back a page
 function viewPreviousPage() {
   console.log("viewing previous page");
@@ -1854,36 +1785,50 @@ function jumpToPageView() {
 
 
 
+/*
+*
+* CHECKBOX GENERATION & INPUT HANDLING
+*
+*/
+
+
+
 //takes pageList text as input and creates new line with checkbox and text
+  //creates Select All box if no checkboxes exist yet
+  //creates Select Section box if entering new section
 function makeCheckbox(label, whichType) {
   var pageList = document.getElementById("page_list");
 
   //create "Select All" checkbox
   if (!pageList.hasChildNodes()) {
+    //container for select all
     var selectAllDiv = document.createElement("div");
     selectAllDiv.id = "selectAllDiv";
     pageList.appendChild(selectAllDiv);
     
+    //checkbox for select all
     var selectAllCheckbox = document.createElement("input");
     selectAllCheckbox.type = "checkbox";
     selectAllCheckbox.id = "selectAllCheckbox";
     selectAllCheckbox.name = "selectAllCheckbox";
     selectAllCheckbox.checked = true
+    selectAllCheckbox.addEventListener('click', changeAllChecked);
     selectAllDiv.appendChild(selectAllCheckbox);
 
+    //label for select all
     var selectAllLabel = document.createElement("label");
     selectAllLabel.htmlFor = "selectAllCheckbox";
     selectAllLabel.innerHTML = "Select All";
     selectAllDiv.appendChild(selectAllLabel);
   }
 
-
+  //container for page selector
   var newCheckboxDiv = document.createElement("div");
   newCheckboxDiv.id = "initialPage" + (printIndex + 1) + "Selector";
   pageList.appendChild(newCheckboxDiv);
 
-  //add sectional checkbox
-  if(
+  //add sectional checkbox if needed
+  if (
     (//first front matter
     whichType == 1 && printIndex == 0) ||
     (//maker matter
@@ -1891,40 +1836,142 @@ function makeCheckbox(label, whichType) {
     (//first back matter
     whichType == 3 && pageIncluded[printIndex][2] == 0)
     ) {
-      
-    var newCheckbox = document.createElement("input");
-    newCheckbox.type = "checkbox";
-    newCheckbox.id = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
-    newCheckbox.name = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
-    newCheckbox.checked = true;
-    newCheckboxDiv.appendChild(newCheckbox);
+    //sectional checkbox
+    var newSectionalCheckbox = document.createElement("input");
+    newSectionalCheckbox.type = "checkbox";
+    newSectionalCheckbox.id = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
+    newSectionalCheckbox.name = "initialPage" + (printIndex + 1) + "SectionalCheckbox";
+    newSectionalCheckbox.checked = true;
+    newSectionalCheckbox.addEventListener('click', changeSectionalChecked);
+    newCheckboxDiv.appendChild(newSectionalCheckbox);
   } else {
-    //newCheckboxDiv.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    //spacer div for current page if not section header
     var newSpacerDiv = document.createElement("div");
         newSpacerDiv.id = "initialPage" + (printIndex + 1) + "Spacer";
         newSpacerDiv.style = "width: 20px; height: 13px; display: inline-block;";
         newCheckboxDiv.appendChild(newSpacerDiv);
   }
 
+  //checkbox for current page
   var newCheckbox = document.createElement("input");
   newCheckbox.type = "checkbox";
   newCheckbox.id = "initialPage" + (printIndex + 1) + "Checkbox";
   newCheckbox.name = "initialPage" + (printIndex + 1) + "Checkbox";
   newCheckbox.checked = true;
+  console.log("Pre event listener");
+  newCheckbox.addEventListener('click', changeSingleChecked);
+  console.log("post event listener");
   newCheckboxDiv.appendChild(newCheckbox);
 
+  //label for current page
   var newCheckboxLabel = document.createElement("label");
   newCheckboxLabel.htmlFor = "initialPage" + (printIndex + 1) + "Checkbox";
   newCheckboxLabel.innerHTML = label;
   newCheckboxDiv.appendChild(newCheckboxLabel);
 
-
-
-
-
   //emplaces reference to div with checkbox and text into fifth place of pageIncluded array
   pageIncluded[printIndex].push(newCheckboxDiv);
 }
+
+
+
+//toggles individual checkbox and corresponding value in pageIncluded
+function changeSingleChecked(e) {
+  var target = e.currentTarget;
+  var targetName = target.name;
+  var targetIndex = targetName.match(/\d+/)[0] - 1;
+  //console.log(targetName + " at index " + targetIndex + " checked status: " + target.checked);
+  //match appropriate page inclusion to checkbox status
+  pageIncluded[targetIndex][0] = target.checked;
+
+  //deselect sectional checkbox if it's selected and this box has been deselected
+  var targetType = pageIncluded[targetIndex][1];
+  var sectionalBox;
+  //front matter sectional checkbox
+  if (targetType == 1) {
+    sectionalBox = document.getElementById("initialPage1SectionalCheckbox");
+    //back matter sectional checkbox
+  } else if (targetType == 3 || targetType == 5) {
+    var tempInd = targetIndex;
+    while (pageIncluded[tempInd - 1][1] != 4) {
+      tempInd--;
+    }
+    //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
+    var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
+    sectionalBox = document.getElementById(nameString);
+    //console.log(sectionalBox);
+    //maker matter sectional checkbox
+  } else if (targetType == 2 || targetType == 4) {
+    var tempInd = targetIndex;
+    while (!(pageIncluded[tempInd - 1][1] == 4 && pageIncluded[tempInd][1] == 2)) {
+      tempInd--;
+    }
+    //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
+    var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
+    sectionalBox = document.getElementById(nameString);
+    //console.log(sectionalBox);
+
+  }
+  if (sectionalBox.checked && !target.checked) {
+    sectionalBox.checked = false;
+  }
+  
+  //deselect "Select All" box if it's selected and this box has been deselected
+  var selectAll = document.getElementById("selectAllCheckbox");
+  if (selectAll.checked && !target.checked) {
+    selectAll.checked = false;
+  }
+}
+
+
+
+//toggles sectional checkboxes
+function changeSectionalChecked(e) {
+  var target = e.currentTarget;
+  var targetName = target.name;
+  var targetIndex = targetName.match(/\d+/)[0] - 1;
+  var targetStatus = target.checked;
+
+  //deselect all checkboxes in section
+  document.getElementById("initialPage" + (targetIndex + 1) + "Checkbox").checked = targetStatus;
+  pageIncluded[targetIndex][0] = target.checked;
+  targetIndex++;
+  var thisElement = pageIncluded[targetIndex];
+  var targetType = thisElement[1];
+
+  while (thisElement[1] == targetType) {
+    document.getElementById("initialPage" + (targetIndex + 1) + "Checkbox").checked = targetStatus;
+    pageIncluded[targetIndex][0] = target.checked;
+    targetIndex++;
+    thisElement = pageIncluded[targetIndex];
+  }
+  if (targetType == 3 && thisElement[1] == 5) {
+    document.getElementById("initialPage" + (targetIndex + 1) + "Checkbox").checked = targetStatus;
+    pageIncluded[targetIndex][0] = target.checked;
+  }
+
+  //deselect "Select All" box if it's selected and this box has been deselected
+  var selectAll = document.getElementById("selectAllCheckbox");
+  if (selectAll.checked && !target.checked) {
+    selectAll.checked = false;
+  }
+}
+
+//toggles all checkboxes
+function changeAllChecked(e) {
+  var target = e.currentTarget;
+  var targetName = target.name;
+
+  var allBoxes = document.querySelectorAll('input');
+  allBoxes.forEach((input) => {
+    if (input.type == "checkbox" && input.name.substring(0, 11) == "initialPage") {
+      //console.log(input.name);
+      input.checked = target.checked;
+      pageIncluded[input.name.match(/\d+/)[0] - 1][0] = target.checked;
+    }
+  });
+}
+
 
 
 /*
