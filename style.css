@@ -23,7 +23,7 @@ html, body {
   font-family: "Brandon Grotesque", sans-serif;
   /*margin-left: 10px;*/
   display: inline-block;
-  width: 500px;
+  width: 620px;
   color: white;
   position: absolute;
 }
@@ -38,6 +38,7 @@ html, body {
   color: white;
   line-height: normal;
 }
+
 
 #authStuff { 
   margin-left: 10px;
