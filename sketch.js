@@ -64,7 +64,7 @@ let backIndex = 0;
 
   //whether final list of included print pages is ready
 //let confirmed = false;  //replace with state enum
-  //contains an entry per print page, [bool included, int whichType]
+  //contains an entry per print page, [bool included, int whichType, specialInd, lastBlue (default -1), checkboxDiv (emplaced later)]
 let pageIncluded = [];
   //tells draw loop whether to actively display previews or not
 //let previewing = false;  //replace with state enum
@@ -82,6 +82,17 @@ Change all measurements from template by 1.02 (it's 800 by 1035, should be 816 b
 */
   //reference to modeSelect html form
 let modeSelector;
+
+  //reference to svg item that is canvas
+let vectorCanvas;
+  //string of last injected svg
+let lastInsert = "";
+  //default state of canvas svg inner html
+let baseState = -1;
+  //white background svg code
+let whiteBG = "<g transform=\"scale(1,1) scale(1,1)\"><rect fill=\"rgb(255,255,255)\" stroke=\"none\" x=\"0\" y=\"0\" width=\"816\" height=\"1056\" fill-opacity=\"1\"></rect></g>";
+  //c7 gray background svg code
+let C7GrayBG = "<g transform=\"scale(1,1) scale(1,1)\"><rect fill=\"rgb(34,42,48)\" stroke=\"none\" x=\"0\" y=\"0\" width=\"816\" height=\"1056\" fill-opacity=\"1\"></rect></g>";
 
 //enum for draw states, to be implemented to replace AllDone, Confirmed, Previewing, and related bools
 const States = {
@@ -113,6 +124,7 @@ function setup() {
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8, SVG);
   document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
   document.getElementById('canvas_shell').appendChild(document.getElementById("defaultCanvas"));
+  vectorCanvas = document.getElementsByTagName('svg')[0];
 
   document.getElementById("generation_settings").style.visibility = "hidden";
 
@@ -320,6 +332,22 @@ function startPressed() {
 //Draws to canvas, snaps and saves all product pages
 //The checks for vectorsOnly don't render anything but insert matter overlay if they fail
 function draw() {
+  
+  if(baseState == -1) {
+    baseState = vectorCanvas.innerHTML;
+    console.log("SEARCH " + baseState);
+    console.log(baseState.substring(0, 53));
+  } else {
+    vectorCanvas.innerHTML = baseState;
+  }
+  clear();/*
+  let str = vectorCanvas.innerHTML;
+  if (lastInsert != "") {
+    //console.log("BASE: " + str);
+    vectorCanvas.innerHTML = str.substring(lastInsert.length);
+  } 
+  clear();*/
+  console.log("passed reset");
   //console.log(document.getElementById('generation_settings').style.visibility);
   //updates user input settings
   if (document.getElementById('generation_settings').style.visibility == "visible") {
@@ -353,9 +381,9 @@ function draw() {
   }
   //console.log(state);
   if (state == States.SETUP) { 
-    background(C7Gray);
+    //background(C7Gray);
   } else { 
-    background(white);
+    //background(white);
     //clear(); 
 
     //yesOverlays = true; //tied to footer graphic, also includes maker page top right
@@ -370,6 +398,10 @@ function draw() {
   
   //compiles all initial pages
   if (state == States.COMPILING) {
+    /*if (printIndex >= 4) {
+      wineIndex = pricedWineList.length;
+      backIndex = backMatter.length - 1;
+    } //DEBUGGING*/
     //draws all but last page
     //if (drawing && printIndex < definitiveLength - 1 && !allDone) {
       let whichType = -1;
@@ -473,7 +505,6 @@ function draw() {
       text("Please sign in to Google to continue", width * 0.5, height * 0.4);
     }
   }
-
 }
 
 
@@ -517,28 +548,28 @@ function compilePage(whichType) {
   //Writes list of generated pages
   switch (whichType) {
     case 1:
-      drawFrontMatter();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png", 1);
+      let str1 = drawFrontMatter();
+      makeCheckbox("&nbsp;" + str1 + "Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_" + (printIndex + 1) + ".svg", 1);
       break;
 
     case 2:
-      drawMakerMatter();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_Fall_" + makers[makerIndex - 1] + ".png", 2);
+      let str2 = drawMakerMatter();
+      makeCheckbox("&nbsp;" + str2 + "Page " + (printIndex + 1) + ": " + "InsertedCopy\\MakerMatter_" + makers[makerIndex - 1] + ".svg", 2);
       break;
 
     case 3:
-      drawGeneralBackMatter();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png", 3);
+      let str3 = drawGeneralBackMatter();
+      makeCheckbox("&nbsp;" + str3 + "Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_" + backIndex + ".svg", 3);
       break;
       
     case 4:
-      drawTechSheets();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title, 4);
+      let str4 = drawTechSheets();
+      makeCheckbox("&nbsp;" + str4 + "Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title, 4);
       break;
 
     case 5:
-      drawLastBackMatter();
-      makeCheckbox("&nbsp;Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_Fall_" + backIndex + ".png", 5);
+      let str5 = drawLastBackMatter();
+      makeCheckbox("&nbsp;" + str5 + "Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_" + backIndex + ".svg", 5);
       //reveal preview controls
       document.getElementById('preview_controls').style.display = "inline-block";
       console.log(pageIncluded);
@@ -629,89 +660,145 @@ function previewPage(thisPageNum, whichType, specialInd) {
 
 
 function drawFrontMatter() {
-  let img;
-  if (!vectorsOnly) {
-    img = frontMatter[printIndex];
-    img = resizeToPrint(img);
-    image(img, 0, 0);
-  }
-  
-  //console.log("Page " + (printIndex + 1) + ": " + "InsertedCopy\\FrontMatter_Fall_" + (printIndex + 1) + ".png");
-
-  //fix footers
   if (printIndex != 0) {
     footer(0, 0);
   }
-  console.log("front page " + printIndex);
-}
-
-
-
-function drawMakerMatter() {
-  let img;
-  lastMaker = justMakerName(pricedWineList[wineIndex][0]);
-  img = makerMatter[makerIndex];
-  console.log(img.width);
-  if (img.width < 10) {
-    console.log("no maker matter found for " + lastMaker);
+  //let exists = await urlExists(path);
+  //fix footers
+  if (frontMatter[printIndex].width < 800) {
+    background("white");
+    console.log("ERROR: InsertedCopy/FrontMatter_" + (printIndex + 1) + ".svg not found");
     push();
       textSize(40);
       fill("red");
       stroke("red");
       textAlign(CENTER, CENTER);
-      //text("NO IMAGE FOUND", width / 2, height / 2);
+      text("NO IMAGE FOUND", width / 2, height / 2);
+    pop();
+    console.log("front page " + printIndex);
+    return "(NOT FOUND) ";
+  } else {
+    var path = "InsertedCopy/FrontMatter_" + (printIndex + 1) + ".svg";
+    var temp = vectorCanvas.innerHTML;
+    var tempBegin = temp.substring(0, 53);
+    var tempEnd = temp.substring(53);
+    lastInsert = "<image x=\"0\" y=\"0\" width=\"816\" height=\"1056\" href=\"" + path + "\"></image>";
+    vectorCanvas.innerHTML = tempBegin + whiteBG + lastInsert + tempEnd;
+    console.log("front page " + printIndex);
+    return "";
+  }
+  //let img;
+  //if (!vectorsOnly) {
+    //img = frontMatter[printIndex];
+    //img = resizeToPrint(img);
+    //image(img, 0, 0);
+  //}
+}
+
+
+
+function drawMakerMatter() {
+  footer(0, 392);
+  let img;
+  lastMaker = justMakerName(pricedWineList[wineIndex][0]);
+  img = makerMatter[makerIndex];
+  console.log(img.width);
+  if (img.width < 10) {
+    //console.log("no maker matter found for " + lastMaker);
+    console.log("ERROR: InsertedCopy/MakerMatter_" + makers[makerIndex - 1] + ".svg not found");
+    push();
+      textSize(40);
+      fill("red");
+      stroke("red");
+      textAlign(CENTER, CENTER);
+      text("NO IMAGE FOUND", width / 2, height / 2);
     pop();
     makerIndex++;
+    console.log("maker page " + printIndex);
+    return "(NOT FOUND) ";
   } else {
-
+    
     //console.log(img.width + " " + img.height);
-    var imgW = img.width;
+    //var imgW = img.width;
     var imgH = img.height;
-    var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
+    //var img2 = img.get(img.width * 0.75, 0, img.width * 0.25, img.height);
     //console.log(lastMaker + " " + imgW + " " + imgH);
     img = resizeToPrint(img);
-    image(img, 0, 0);
+    //image(img, 0, 0);
     makerIndex++;
     var blueIn = pageIncluded[printIndex][3];
     
     //fix top right wine listing
-    makerWineList(img2, blueIn, imgH);
+    makerWineList(img, blueIn, imgH);
+    
+    
+    let path = "InsertedCopy/MakerMatter_" + makers[makerIndex - 1] + ".svg";
+    var temp = vectorCanvas.innerHTML;
+    var tempBegin = temp.substring(0, 53);
+    var tempEnd = temp.substring(53);
+    lastInsert = "<image x=\"0\" y=\"0\" width=\"816\" height=\"1056\" href=\"" + path + "\"></image>";
+    vectorCanvas.innerHTML = tempBegin + whiteBG + lastInsert + tempEnd;
+    console.log("maker page " + printIndex);
+    return "";
   }
   //makerWineList(img, imgW, imgH);
 
   //fix footers
-  footer(0, 392);
 
   //pdf.nextPage();
     
-  console.log("maker page " + printIndex);
 }
 
 
 
 function drawGeneralBackMatter() {
-  let img;
-  img = backMatter[backIndex];
-  img = resizeToPrint(img);
-  image(img, 0, 0);
-
+  //let img;
+  //img = backMatter[backIndex];
+  //img = resizeToPrint(img);
+  //image(img, 0, 0);
+  
   //fix footers
   if (backIndex < 2) {
     footer(243, 0);
   } else {
     footer(0, 0);
   }
-
-  //pdf.nextPage();
-
-  backIndex++;
-  console.log("back page " + printIndex);
   
+  //pdf.nextPage();
+  
+  if (backMatter[backIndex].width < 800) {
+    background("white");
+    console.log("ERROR: InsertedCopy/BackMatter_" + backIndex + ".svg not found");
+    push();
+      textSize(40);
+      fill("red");
+      stroke("red");
+      textAlign(CENTER, CENTER);
+      text("NO IMAGE FOUND", width / 2, height / 2);
+    pop();
+    backIndex++;
+    console.log("back page " + printIndex);
+    return "(NOT FOUND) ";
+  } else {
+    let path  ="InsertedCopy/BackMatter_" + backIndex + ".svg";
+    var temp = vectorCanvas.innerHTML;
+    var tempBegin = temp.substring(0, 53);
+    var tempEnd = temp.substring(53);
+    lastInsert = "<image x=\"0\" y=\"0\" width=\"816\" height=\"1056\" href=\"" + path + "\"></image>";
+    vectorCanvas.innerHTML = tempBegin + whiteBG + lastInsert + tempEnd;
+    backIndex++;
+    console.log("back page " + printIndex);
+    return "";
+  }
+  
+  
+
 }
 
 
 
 function drawTechSheets() {
+  background("white");
   pages();
   footer(0, 0);
   console.log(wineIndex + " " + pricedWineList[wineIndex])
@@ -729,16 +816,17 @@ function drawTechSheets() {
     document.getElementById('page_list').style.display = "inline-block";
     repositionButtons();
   }
+  return "";
 }
 
 
 
 function drawLastBackMatter() {
   console.log("drawing last page");
-  let img;
-  img = backMatter[backIndex];
-  img = resizeToPrint(img);
-  image(img, 0, 0);
+  //let img;
+  //img = backMatter[backIndex];
+  //img = resizeToPrint(img);
+  //image(img, 0, 0);
 
   //fix footers
   if (backIndex < 2) {
@@ -746,6 +834,27 @@ function drawLastBackMatter() {
   } else {
     footer(0, 0);
   }
+  var found = true;
+  if (backMatter[backIndex].width < 800) {
+    found = false;
+    background("white");
+    console.log("ERROR: InsertedCopy/BackMatter_" + backIndex + ".svg not found");
+    push();
+      textSize(40);
+      fill("red");
+      stroke("red");
+      textAlign(CENTER, CENTER);
+      text("NO IMAGE FOUND", width / 2, height / 2);
+    pop();
+  } else {
+    let path  ="InsertedCopy/BackMatter_" + backIndex + ".svg";
+    var temp = vectorCanvas.innerHTML;
+    var tempBegin = temp.substring(0, 53);
+    var tempEnd = temp.substring(53);
+    lastInsert = "<image x=\"0\" y=\"0\" width=\"816\" height=\"1056\" href=\"" + path + "\"></image>";
+    vectorCanvas.innerHTML = tempBegin + whiteBG + lastInsert + tempEnd;
+  }
+
   repositionButtons();
   backIndex++;
 
@@ -756,6 +865,7 @@ function drawLastBackMatter() {
     document.getElementById('printer_shell').style.display = 'block'
     document.getElementById('page_list').style.display = "inline-block";
   }
+    
   
   //
   //
@@ -765,6 +875,10 @@ function drawLastBackMatter() {
   //
   //
   repositionButtons();
+  if (!found) {
+    return "(NOT FOUND) ";
+  }
+  return "";
 }
 
 
@@ -799,7 +913,7 @@ function formatPrice(thisWine) {
 
 //Iterates through wineList to create product pages (requires Nicole's designs) - consider special case for multiple variants
 function pages() {
-  background("white");
+  //background("white");
   var thisWine = pricedWineList[wineIndex];
   fill('#ED225D');
   textSize(30);
@@ -1149,18 +1263,16 @@ function footer(leftSide, rightSide) {
 
 //Generates wine list on top right of maker pages
 function makerWineList(thisImg, blueIn, thisHeight) {
-  imageMode(CORNER);
-  thisImg.resize(204, 1056);
-
+  //imageMode(CORNER);
   let thisContent = [];
   //identifies box area
   var foundEnd = false;
   var lastBlue = 0;
   if (blueIn == -1) {
-    while(!foundEnd && lastBlue < thisImg.height) {
-      var color = thisImg.get(203, lastBlue);
+    while(!foundEnd && lastBlue < height) {
+      var color = thisImg.get(815, lastBlue);
       console.log(color[0] + " " + color[1] + " " + color[2]);
-      if (color[0] != 43 || color[1] != 52 || color[2] != 117) {
+      if (color[0] != 42 || color[1] != 52 || color[2] != 117) {
         foundEnd = true;
       }
       fill(color);
@@ -1528,7 +1640,7 @@ function loadMatter() {
   makerMatter = [];
   backMatter = [];
   for (var i = 0; i < 3; i++) {
-    var toPush = (loadImage('InsertedCopy\\FrontMatter_Fall_' + (i + 1) + '.png'));
+    var toPush = (loadImage('InsertedCopy\\FrontMatter_' + (i + 1) + '.svg'));
     frontMatter.push(toPush);
   }
   console.log(frontMatter);
@@ -1536,7 +1648,7 @@ function loadMatter() {
   //loads mid matter (maker profiles)
   for (var i = 0; i < makers.length; i++) {
     console.log(makers[i]);
-    var toPush = loadImage('InsertedCopy\\MakerMatter_Fall_' + makers[i] + '.png', makerMatterSucceeded, makerMatterFailed);
+    var toPush = loadImage('InsertedCopy\\MakerMatter_' + makers[i] + '.svg', makerMatterSucceeded, makerMatterFailed);
     makerMatter.push(toPush);
     /*
     if(toPush.width > 10) {
@@ -1548,7 +1660,7 @@ function loadMatter() {
   
   //loads back matter
   for (var i = 0; i < 8; i++) {
-    var toPush = (loadImage('InsertedCopy\\BackMatter_Fall_' + (i + 1) + '.png'));
+    var toPush = (loadImage('InsertedCopy\\BackMatter_' + (i + 1) + '.svg'));
     backMatter.push(toPush);
   }
   console.log(backMatter);
@@ -1642,14 +1754,16 @@ function repositionButtons() {
   var viewNext = document.getElementById("viewNext");
   var jumpToPage = document.getElementById("pageNumIn");
   var previewBox = previewControls.getBoundingClientRect();
-  var jumpBox = jumpToPage.getBoundingClientRect();
   var previewButtonHeight = 22;
-
-  //viewPrev.style = "width: 10%; height: 45%; top: " +  (previewBox.top + (previewBox.height * 0.5) - (viewPrev.getBoundingClientRect().height * 0.5)) + "px;";
-  var jumpPageTop = viewPrev.getBoundingClientRect().top + window.scrollY - ((jumpBox.height - previewButtonHeight) * 0.5);
-  jumpToPage.style = "width: 20%; margin-left: 10px; margin-right: 10px; left: " + (previewBox.left + (previewBox.width * 0.5) - (jumpBox.width * 0.5)) + "px; height: " + previewButtonHeight + "px; top: " + jumpPageTop + "px; position: absolute;"; 
-  viewPrev.style = "width: 10%; position: absolute; left: " + (jumpBox.left - 10 - viewPrev.getBoundingClientRect().width) + "px; height: " + previewButtonHeight + "px;";
-  viewNext.style = "width: 10%; position: absolute; left: " + (jumpBox.right + 10) + "px; height: " + previewButtonHeight + "px;";
+  if (jumpToPage) {
+    var jumpBox = jumpToPage.getBoundingClientRect();
+    
+    //viewPrev.style = "width: 10%; height: 45%; top: " +  (previewBox.top + (previewBox.height * 0.5) - (viewPrev.getBoundingClientRect().height * 0.5)) + "px;";
+    var jumpPageTop = viewPrev.getBoundingClientRect().top + window.scrollY - ((jumpBox.height - previewButtonHeight) * 0.5);
+    jumpToPage.style = "width: 20%; margin-left: 10px; margin-right: 10px; left: " + (previewBox.left + (previewBox.width * 0.5) - (jumpBox.width * 0.5)) + "px; height: " + previewButtonHeight + "px; top: " + jumpPageTop + "px; position: absolute;"; 
+    viewPrev.style = "width: 10%; position: absolute; left: " + (jumpBox.left - 10 - viewPrev.getBoundingClientRect().width) + "px; height: " + previewButtonHeight + "px;";
+    viewNext.style = "width: 10%; position: absolute; left: " + (jumpBox.right + 10) + "px; height: " + previewButtonHeight + "px;";
+  }
 
   //viewNext.style = "";
   //jumpToPage.style = "";
