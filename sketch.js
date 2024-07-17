@@ -152,6 +152,9 @@ function windowResized() {
     } else {
       determiningDim = window.innerWidth; 
     }
+    if (determiningDim < 600) {
+      determiningDim = 600;
+    }
     //console.log(window.innerWidth + "x" + window.innerHeight + determiningDim);
     resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
     //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
