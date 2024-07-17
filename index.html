@@ -32,75 +32,76 @@
   </head>
 
   <body>
-    <div id="instructions">
-      Please make sure you're using Chrome on a laptop or desktop
-      <br>
-      The PDF won't generate properly in other browsers or on mobile devices
-      <br>
-      Allow extra load time for vector files
-      <br>
-    </div>
+    <div>
+      <div id="instructions">
+        Please make sure you're using Chrome on a laptop or desktop
+        <br>
+        The PDF won't generate properly in other browsers or on mobile devices
+        <br>
+        Allow extra load time for vector files
+        <br>
+      </div>
 
-    <div id="holder">
-      <div>
-        <div id="canvas_shell" style="border:1px solid white">
-          <div id="generation_settings">
-            <button id="confirm_generation" onclick="startPressed()">Generate Sheets</button>
-            <form id="modeSelect" style="visibility: hidden">
-              <fieldset>
-                <legend style="border:1px solid white;">Choose output mode</legend>
-  
-                <!--Mode selector radio-->
-                <input type="radio" name="contentMode" id="Full Catalog" value="Full Catalog" checked="true"/>
-                <label for="Full Catalog">Full Catalog</label><br> 
-                <input type="radio" name="contentMode" id="Print-Ready Kit" value="Print-Ready Kit"/>
-                <label for="Print-Ready Kit">Print-Ready Kit</label><br>
-                <input type="radio" name="contentMode" id="Tech Sheets" value="Tech Sheets"/>
-                <label for="Tech Sheets">Tech Sheets</label><br>
-                <input type="radio" name="contentMode" id="Overlays" value="Overlays"/>
-                <label for="Overlays">Overlays</label><br>
-  
-                <!--Price inclusion-->
-                <input type="checkbox" name="priceIncluded" id="priceIncluded" value="yes" checked="true" style="margin-top: 10px;"/>
-                <label for="priceIncluded">Include Price?</label>
-  
-              </fieldset>
-            </form>
-            
+      <div id="holder">
+        <div>
+          <div id="canvas_shell" style="border:1px solid white">
+            <div id="generation_settings">
+              <button id="confirm_generation" onclick="startPressed()">Generate Sheets</button>
+              <form id="modeSelect" style="visibility: hidden">
+                <fieldset>
+                  <legend style="border:1px solid white;">Choose output mode</legend>
+    
+                  <!--Mode selector radio-->
+                  <input type="radio" name="contentMode" id="Full Catalog" value="Full Catalog" checked="true"/>
+                  <label for="Full Catalog">Full Catalog</label><br> 
+                  <input type="radio" name="contentMode" id="Print-Ready Kit" value="Print-Ready Kit"/>
+                  <label for="Print-Ready Kit">Print-Ready Kit</label><br>
+                  <input type="radio" name="contentMode" id="Tech Sheets" value="Tech Sheets"/>
+                  <label for="Tech Sheets">Tech Sheets</label><br>
+                  <input type="radio" name="contentMode" id="Overlays" value="Overlays"/>
+                  <label for="Overlays">Overlays</label><br>
+    
+                  <!--Price inclusion-->
+                  <input type="checkbox" name="priceIncluded" id="priceIncluded" value="yes" checked="true" style="margin-top: 10px;"/>
+                  <label for="priceIncluded">Include Price?</label>
+    
+                </fieldset>
+              </form>
+              
+            </div>
+          </div>
+          
+          
+          <div id="preview_controls" style="border:1px solid white;"> 
+            <pre></pre>
+            <button id="viewPrev" onclick="viewPreviousPage()" style="width: 10%; height: 45%; position: absolute;">Previous</button> 
+            <input type="number" id="pageNumIn" onchange="jumpToPageView()" placeholder="e.g. 32" min="1" style="width: 20%; height: 45%; margin-left: 10px; margin-right: 10px;"/>
+            <button id="viewNext" onclick="viewNextPage()" style="width: 10%; height: 45%; position: absolute;">Next</button> 
           </div>
         </div>
-        
-        
-        <div id="preview_controls" style="border:1px solid white;"> 
+      </div>
+
+      <div id="page_list" style="border:1px solid white;">
+      </div>
+
+      <div style="clear: both;"></div>
+
+      <div id="authStuff">
+
+        <div id="printer_shell">
+          <button id="print_button" onclick="preparePDF()">Print Sheets</button>
           <pre></pre>
-          <button id="viewPrev" onclick="viewPreviousPage()" style="width: 10%; height: 45%; position: absolute;">Previous</button> 
-          <input type="number" id="pageNumIn" onchange="jumpToPageView()" placeholder="e.g. 32" min="1" style="width: 20%; height: 45%; margin-left: 10px; margin-right: 10px;"/>
-          <button id="viewNext" onclick="viewNextPage()" style="width: 10%; height: 45%; position: absolute;">Next</button> 
         </div>
-      </div>
-    </div>
 
-    <div id="page_list" style="border:1px solid white;">
-    </div>
-
-    <div style="clear: both;"></div>
-
-    <div id="authStuff">
-
-      <div id="printer_shell">
-        <button id="print_button" onclick="preparePDF()">Print Sheets</button>
+        <button id="authorize_button" onclick="handleAuthClick()">Sign In</button>
         <pre></pre>
+        <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+        <pre id="content" style="white-space: pre-wrap;"></pre>
+        <script src="googleAuth.js"></script>
+        <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+        <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
       </div>
-
-      <button id="authorize_button" onclick="handleAuthClick()">Sign In</button>
-      <pre></pre>
-      <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-      <pre id="content" style="white-space: pre-wrap;"></pre>
-      <script src="googleAuth.js"></script>
-      <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-      <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
-    </div>
 
     <!--<script src="index.js"></script>
     <pre id="content" style="white-space: pre-wrap;"></pre>
@@ -114,7 +115,7 @@
     </label>
     <input id="file-upload" type="file" webkitdirectory="" directory="" hidden />
     -->
-    
+  </div>
   </body>
   <!--google quickstart-->
 </html>
