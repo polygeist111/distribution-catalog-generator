@@ -121,6 +121,10 @@ function setup() {
   //console.log(makerMatter);
   //console.log(backMatter);
   if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
+  //edit for mobile friendly version
+  if (determiningDim < 600) {
+    determiningDim = 600;
+  }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8, SVG);
   document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
   document.getElementById('canvas_shell').appendChild(document.getElementById("defaultCanvas"));

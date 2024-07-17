@@ -147,6 +147,7 @@
         const priceResult = response.result.values;
         //console.log(priceResult);
         //console.log(priceResult[2][1]);
+        console.log("SEARCH " + priceResult);
         filterPrices(priceResult);
         /*
         const output = range.values.reduce(
