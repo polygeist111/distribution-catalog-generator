@@ -912,7 +912,7 @@ function formatPrice(thisWine) {
     //in case of multiple variant SKUs, e.g. 2021 Matan
     if (thisWine.length > 3) {
       if (checkVariantAvailability(thisWine, i - 2)) {
-        if (thisWine.length < i || thisWine[i] == NULL) {
+        if (thisWine.length < i || thisWine[i] == null) {
           price += " | Not Found"; 
         } else {
           price += " | " + thisWine[i];
@@ -920,7 +920,7 @@ function formatPrice(thisWine) {
       }
     //in base case of only one SKU
     } else {
-      if (thisWine.length < i || thisWine[i] == NULL) {
+      if (thisWine.length < i || thisWine[i] == null) {
         price += " | Not Found"; 
       } else {
         price += " | " + thisWine[i];
