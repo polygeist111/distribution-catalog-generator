@@ -103,11 +103,6 @@ const States = {
 };
 var state = 0;
 
-let col1;
-let col2;
-let authStuff;
-let pageList;
-
 function preload() {
   testFont = loadFont('Fonts\\MoonlessSC-Regular (1).otf');
   regFont = loadFont('Fonts\\Brandon-Grotesque-Regular.otf');
@@ -131,26 +126,20 @@ function setup() {
     determiningDim = 600;
   }
   var canvas = createCanvas(determiningDim * 0.8, determiningDim * 0.8, SVG);
-  //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
-  document.getElementById("defaultCanvas").style.display = "inline-block";
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 10) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 10) + "px; float: left;";
   document.getElementById('canvas_shell').appendChild(document.getElementById("defaultCanvas"));
   vectorCanvas = document.getElementsByTagName('svg')[0];
 
-  //document.getElementById("generation_settings").style.display = "none";
+  //document.getElementById("generation_settings").style.visibility = "hidden";
 
-  //document.getElementById('print_button').style.display = "none";
+  //document.getElementById('printer_shell').style.display = "none";
   //document.getElementById('page_list').style.display = "none";
 
   //document.getElementById('preview_controls').style.display = "none";
   textFont(regFont);
   noStroke();
-  state = States.SETUP;
-  col1 = document.getElementById("col1");
-  col2 = document.getElementById("col2");
-  authStuff = document.getElementById("authStuff");
-  pageList = document.getElementById("page_list");
-
   windowResized();
+  state = States.SETUP;
 }
 
 
@@ -185,27 +174,9 @@ function windowResized() {
     //console.log((parseFloat((shellStyle.width).substring(0, (shellStyle.width).length - 2)) + 10));
   }
 
-  windowResized();
+
+  repositionButtons();
   */
-  console.log("RESIZE called")
-  if (window.innerWidth >= 1500) {
-    //console.log(col1.childNodes);
-    console.log("SEARCH " + col2.querySelector("#authStuff") + " " + col1.querySelector("#page_list") + " " + pageList.style.display);
-    if (col2.querySelector("#authStuff") != null && col1.querySelector("#page_list") != null && state == States.PREVIEWING) {
-      col2.removeChild(authStuff);
-      col1.appendChild(authStuff);
-      col1.removeChild(pageList);
-      col2.appendChild(pageList);
-    }
-  } else {
-    if (col1.querySelector("#authStuff") != null && col2.querySelector("#page_list") != null && state == States.PREVIEWING) {
-      col1.removeChild(authStuff);
-      col2.appendChild(authStuff);
-      col2.removeChild(pageList);
-      col1.appendChild(pageList);
-    }
-  }
-  //console.log(col1.childNodes);
 }
 
 
@@ -225,7 +196,7 @@ function populateProducts(cursorIn) {
   })
   .catch(e => { console.log(e) });
 
-  windowResized();
+  repositionButtons();
 }
 
 
@@ -342,14 +313,14 @@ function wineName(wine) {
 function startPressed() {
   fill(white);
   resizeCanvas(816, 1056);
-  //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
   state = States.COMPILING;
   pdf.beginRecord();
   //button1.hide();
   document.getElementById("generation_settings").style.display = "none";
 
-  windowResized();
+  repositionButtons();
 }
 
 
@@ -397,15 +368,15 @@ function draw() {
   console.log("passed reset");
   //console.log(document.getElementById('generation_settings').style.visibility);
   //updates user input settings
-  if (document.getElementById('generation_settings').style.display == "inline-block") {
+  if (document.getElementById('generation_settings').style.visibility == "visible") {
     readGenerationSettings();
   }
   //resizes previewControl div to match sketch container
   if (document.getElementById('preview_controls').style.display != "none") {
     canvasObject = document.getElementById('canvas_shell').getBoundingClientRect();
     //document.getElementById('preview_controls').style = "width: " + (canvasObject.width - 2) + "px; display: inline-block; border: 1px solid white; left: " + 0 + "px; top " + (canvasObject.bottom) + "px;";
-    //document.getElementById('preview_controls').style = "width: " + (canvasObject.width - 2) + "px; display: inline-block; border: 1px solid white; line-height: normal;";
-    windowResized();
+    document.getElementById('preview_controls').style = "width: " + (canvasObject.width - 2) + "px; display: inline-block; border: 1px solid white; line-height: normal;";
+    repositionButtons();
   }
   //handles pageList and authStuff format switching based on window width
   if(document.getElementById('page_list').style.display != "none") {
@@ -415,14 +386,14 @@ function draw() {
     if (window.innerWidth < canvasObject.width + thisPageList.getBoundingClientRect().width + 20) {
       //thisPageList.style.left = canvasObject.left;
       //thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
-      //document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + canvasObject.left + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY + 10)+ "px;";
-      //document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8 + window.scrollY) + "px;";
+      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + canvasObject.left + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY + 10)+ "px;";
+      document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8 + window.scrollY) + "px;";
 
     } else {
       //thisPageList.style.left = canvasObject.right;
       //thisPageList.style.top = canvasObject.top;
-      //document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + (canvasObject.top + window.scrollY) + "px;";
-      //document.getElementById('authStuff').style = "left: " + (canvasObject.left - 10) + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY)+ "px;";
+      document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + (canvasObject.top + window.scrollY) + "px;";
+      document.getElementById('authStuff').style = "left: " + (canvasObject.left - 10) + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY)+ "px;";
     }
 
   }
@@ -537,7 +508,7 @@ function draw() {
   }
 
   if (state == States.SETUP) {
-    //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
+    document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
 
     fill('#ED225D');
     textSize(30);
@@ -618,7 +589,7 @@ function compilePage(whichType) {
       let str5 = drawLastBackMatter();
       makeCheckbox("&nbsp;" + str5 + "Page " + (printIndex + 1) + ": " + "InsertedCopy\\BackMatter_" + backIndex + ".svg", 5);
       //reveal preview controls
-      document.getElementById('preview_controls').style.display = "flex";
+      document.getElementById('preview_controls').style.display = "inline-block";
       console.log(pageIncluded);
       //state = States.PREVIEWING
       document.getElementById('pageNumIn').max = printIndex + 1;
@@ -859,9 +830,9 @@ function drawTechSheets() {
     //noLoop();
     state = States.PREVIEWING;
     //button2.show();
-    document.getElementById('print_button').style.display = 'block'
+    document.getElementById('printer_shell').style.display = 'block'
     document.getElementById('page_list').style.display = "inline-block";
-    windowResized();
+    repositionButtons();
   }
   return "";
 }
@@ -902,7 +873,7 @@ function drawLastBackMatter() {
     vectorCanvas.innerHTML = tempBegin + whiteBG + lastInsert + tempEnd;
   }
 
-  windowResized();
+  repositionButtons();
   backIndex++;
 
   
@@ -910,7 +881,7 @@ function drawLastBackMatter() {
     //noLoop();
     state = States.PREVIEWING;
     //button2.show();
-    document.getElementById('print_button').style.display = 'block'
+    document.getElementById('printer_shell').style.display = 'block'
     document.getElementById('page_list').style.display = "inline-block";
   }
     
@@ -922,7 +893,7 @@ function drawLastBackMatter() {
   //or confirm selected pages
   //
   //
-  windowResized();
+  repositionButtons();
   if (!found) {
     return "(NOT FOUND) ";
   }
@@ -1056,7 +1027,7 @@ function reStart() {
 
   //if (window.innerWidth > window.innerHeight) { determiningDim = window.innerHeight; } else { determiningDim = window.innerWidth; }
   resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
-  //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + (-1)) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + (-1)) + "px; border: 1px solid white; float: left;";
+  document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + (-1)) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + (-1)) + "px; border: 1px solid white; float: left;";
 
 
   noLoop();
@@ -1076,8 +1047,8 @@ function reStart() {
   vectorsOnly = false;
 
   populateProducts("start");
-  document.getElementById("generation_settings").style.display = "none";
-  document.getElementById('printer_button').style.display = "none";
+  document.getElementById("generation_settings").style.visibility = "hidden";
+  document.getElementById('printer_shell').style.display = "none";
   document.getElementById('page_list').innerHTML = "";
   document.getElementById('page_list').style.display = "none";
   
@@ -1091,7 +1062,7 @@ function reStart() {
 
   console.log("reStarted");
 
-  windowResized();
+  repositionButtons();
 }
 
 
@@ -1139,10 +1110,9 @@ function preparePDF() {
   var previewControls = document.getElementById('preview_controls');
   previewControls.style.display = "none";
   document.getElementById('page_list').style.display = "none";
-  /*
   while(previewControls.firstChild) {
     previewControls.removeChild(previewControls.firstChild);
-  }*/
+  }
   viewingPageNum = 1;
 
   var temp = definitiveLength - 1;
@@ -1187,7 +1157,7 @@ function loadImages() {
   console.log("Definitive Length: " + definitiveLength);
 
   setTimeout(function() {
-     document.getElementById("generation_settings").style.display = "flex";
+     document.getElementById("generation_settings").style.visibility = "visible";
     
   }, 2000);
   
@@ -1794,7 +1764,7 @@ function repositionButtons() {
   var pageListX = pageListRect.left + window.scrollX;
   var pageListY = pageListRect.top + window.scrollY;
 
-  var thisPrinter = document.getElementById('print_button');
+  var thisPrinter = document.getElementById('printer_shell');
   var printerRect = thisPrinter.getBoundingClientRect();
   var printerX = printerRect.left + window.scrollX;
   var printerY = printerRect.top + window.scrollY;
@@ -2016,7 +1986,7 @@ function jumpToPageView() {
   //creates Select All box if no checkboxes exist yet
   //creates Select Section box if entering new section
 function makeCheckbox(label, whichType) {
-  //var pageList = document.getElementById("page_list");
+  var pageList = document.getElementById("page_list");
 
   //create "Select All" checkbox
   if (!pageList.hasChildNodes()) {
@@ -2067,8 +2037,7 @@ function makeCheckbox(label, whichType) {
     //spacer div for current page if not section header
     var newSpacerDiv = document.createElement("div");
         newSpacerDiv.id = "initialPage" + (printIndex + 1) + "Spacer";
-        newSpacerDiv.class = "checkboxSpacer";
-        //newSpacerDiv.style = "width: 20px; height: 13px; display: inline-block;";
+        newSpacerDiv.style = "width: 20px; height: 13px; display: inline-block;";
         newCheckboxDiv.appendChild(newSpacerDiv);
   }
 

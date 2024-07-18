@@ -25,8 +25,8 @@
       let gapiInited = false;
       let gisInited = false;
 
-      document.getElementById('authorize_button').style.visibility = 'hidden';
-      document.getElementById('signout_button').style.visibility = 'hidden';
+      //document.getElementById('authorize_button').style.display = "none";
+      //document.getElementById('signout_button').style.display = "none";
 
         /*
       //Sets up buttons
@@ -74,7 +74,7 @@
       //Enables user interaction after all libraries are loaded.
       function maybeEnableButtons() {
         if (gapiInited && gisInited) {
-          document.getElementById('authorize_button').style.visibility = 'visible';
+          document.getElementById('authorize_button').style.display = "block";
           //authorize_button.show();
         }
       }
@@ -85,7 +85,7 @@
           if (resp.error !== undefined) {
             throw (resp);
           }
-          document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('signout_button').style.display = "block";
           //signout_button.show();
           //authorize_button.html("Refresh");
           document.getElementById('authorize_button').innerText = 'Refresh';
@@ -114,7 +114,7 @@
           //authorize_button.html("Authorize");
           document.getElementById('authorize_button').innerText = 'Authorize';
           //signout_button.hide();
-          document.getElementById('signout_button').style.visibility = 'hidden';
+          document.getElementById('signout_button').style.display = "none";
           button1.hide();
         }
       }

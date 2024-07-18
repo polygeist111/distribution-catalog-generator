@@ -1,0 +1,91 @@
+html, body {
+  margin: 00;
+  padding: 0;
+}
+
+#canvas_shell {
+  margin-left: 10px;
+  margin-bottom: 10px;
+
+  padding: 0;
+  display: inline-block;
+  
+  /*
+  margin-top: 0px;
+  margin-left: 0px;
+  height: 764px;
+  height: #canvas.height;
+  width: #canvas.width;*/
+}
+
+#page_list {
+  font-family: "Brandon Grotesque", sans-serif;
+  /*margin-left: 10px;*/
+  display: inline-block;
+  width: 620px;
+  color: white;
+  position: absolute;
+}
+
+#preview_controls {
+  font-family: "Brandon Grotesque", sans-serif;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  color: white;
+  line-height: normal;
+}
+
+
+#authStuff { 
+  margin-left: 10px;
+  margin-top: 8px; 
+  position: absolute;
+  
+}
+
+#instructions {
+  margin: 10px;
+  color: white;
+  font-family: "Brandon Grotesque", sans-serif;
+}
+
+
+@font-face { 
+  font-family: "Brandon Grotesque";
+  src: url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.eot');
+  src: url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.eot') format('embedded-opentype'),
+       url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.woff2') format('woff2'),
+       url('Fonts\\Web\\Brandon-Grotesque-Web-Regular.woff') format('woff'),
+       url('Fonts\\Brandon-Grotesque-Regular.otf') format('opentype'); 
+} 
+
+:root {
+  --c7-page-height: 955px;
+  /*onload="resizeIframe(this);*/
+}
+
+#modeSelect {
+  legend {
+    color:#ED225D;
+    padding: 3px 6px;
+    /*stroke:white;*/
+    /*background-color:white;*/
+  }
+}
+
+.singleRow {
+  float: left;
+}
+
+#credits {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+/*wide display, pageList right*/
+@media only screen and (min-width: 1500px) {
+
+}

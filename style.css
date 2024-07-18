@@ -1,14 +1,41 @@
 html, body {
-  margin: 00;
+  margin: 0;
   padding: 0;
+  font-family: "Brandon Grotesque", sans-serif;
+
+}
+
+#holder {
+  display: flex;
+  flex-direction: row;
+  row-gap: 10px;
+}
+
+.mainCol {
+  display: inline-block;
+}
+
+#canvas_and_preview {
+  display: inline;
+  margin-left: 10px;
+  width: min-content;
+  order: 1;
+}
+
+#canvasWrapper {
+  display: inline-block;
+  border: 1px solid white;
+  padding: 0;
+  margin-bottom: 10px;
+
 }
 
 #canvas_shell {
-  margin-left: 10px;
-  margin-bottom: 10px;
-
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin: 0;
   padding: 0;
-  display: inline-block;
   
   /*
   margin-top: 0px;
@@ -18,32 +45,101 @@ html, body {
   width: #canvas.width;*/
 }
 
-#page_list {
-  font-family: "Brandon Grotesque", sans-serif;
-  /*margin-left: 10px;*/
-  display: inline-block;
-  width: 620px;
+#defaultCanvas {
+  display: none;
+  grid-row: 1 / 4;
+  grid-column: 1 / 4;
+}
+
+#generation_settings {
+  display: none;
+  grid-row: 2 / 3;
+  grid-column: 2 / 3;
+  flex-flow: column nowrap;
+  align-items: center;
+  transform: translateY(50%);
+  /*max-width: 300px;*/
+}
+
+#confirm_generation {
+  margin-bottom: 15px;
+}
+
+#modeSelect {
+  width: max-content;
   color: white;
-  position: absolute;
+}
+
+#modeSelect legend {
+  margin: auto;
+  color:#ED225D;
+  padding: 3px 6px;
+  border: 1px solid white;
+  font-size: large;
+  /*stroke:white;*/
+  /*background-color:white;*/
 }
 
 #preview_controls {
-  font-family: "Brandon Grotesque", sans-serif;
+  display: none;
+  height: 50px;
+  width: 98.6%;
   margin-left: 10px;
   margin-bottom: 10px;
-  height: 50px;
-  display: flex;
+  border: 1px solid white;
+  /*display: none;*/
+  /*change to display flex*/
   justify-content: center;
+  align-items: center;
   color: white;
   line-height: normal;
 }
 
+.previewButton {
+  width: 10%;
+  height: 45%;
+}
+
+#pageNumIn {
+  width: 20%; 
+  height: 45%; 
+  margin-left: 10px; 
+  margin-right: 10px;
+}
 
 #authStuff { 
   margin-left: 10px;
-  margin-top: 8px; 
+  margin-top: 0px;
+  order: 3; 
+}
+
+.authButton {
+  margin-bottom: 10px;
+}
+
+#authorize_button {
+  display: block;
+}
+
+#signout_button {
+  display: none;
+}
+
+#print_button {
+  display: none;
+}
+
+#page_list {
+  font-family: "Brandon Grotesque", sans-serif;
+  /*margin-left: 10px;*/
+  display: none;
+  /*change to display: inline-block;*/
+  border: 1px solid white;
+  width: 620px;
+  color: white;
   position: absolute;
-  
+  order: 2;
+  margin-left: 10px;
 }
 
 #instructions {
@@ -51,7 +147,6 @@ html, body {
   color: white;
   font-family: "Brandon Grotesque", sans-serif;
 }
-
 
 @font-face { 
   font-family: "Brandon Grotesque";
@@ -67,16 +162,29 @@ html, body {
   /*onload="resizeIframe(this);*/
 }
 
-#modeSelect {
-  legend {
-    color:#ED225D;
-    padding: 3px 6px;
-    /*stroke:white;*/
-    /*background-color:white;*/
+#credits {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+#priceIncluded {
+  margin-top: 10px;
+}
+
+.checkboxSpacer {
+  width: 20px; 
+  height: 13px; 
+  display: inline-block;
+}
+
+/*wide display, pageList right*/
+@media only screen and (min-width: 1500px) {
+  #authStuff {
+    order: 2;
   }
-}
 
-.singleRow {
-  float: left;
-}
+  #pageList {
+    order: 3;
+  }
 
+}
