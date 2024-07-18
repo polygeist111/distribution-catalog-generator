@@ -159,9 +159,20 @@ function windowResized() {
     resizeCanvas(determiningDim * 0.8, determiningDim * 0.8);
     //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
     //button2.position(width * 0.5 - button2.width * 0.5,  height * -0.5 + button2.height * -0.5, "relative");
-    document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
-    document.getElementById('holder').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px;";
+    let canvasRect = document.getElementById("defaultCanvas").getBoundingClientRect();
+    let shellStyle = document.getElementById('canvas_shell').style;
+    let holderStyle = document.getElementById('holder').style;
+
+    //shellStyle = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
+    shellStyle.width = (canvasRect.width + 1) + "px";
+    shellStyle.Height = (canvasRect.height + 1) + "px";
+    shellStyle.border = "1px solid white;";
+    shellStyle.float = "left"
+    holderStyle.width = (parseFloat((shellStyle.width).substring(0, (shellStyle.width).length - 2)) + 10) + "px";
+    holderStyle.minHeight = shellStyle.height;
+    //console.log((parseFloat((shellStyle.width).substring(0, (shellStyle.width).length - 2)) + 10));
   }
+
 
   repositionButtons();
 
