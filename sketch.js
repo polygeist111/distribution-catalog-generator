@@ -342,7 +342,6 @@ function draw() {
   
   if(baseState == -1) {
     baseState = vectorCanvas.innerHTML;
-    console.log("SEARCH " + baseState);
     console.log(baseState.substring(0, 53));
   } else {
     vectorCanvas.innerHTML = baseState;
@@ -775,7 +774,7 @@ function drawGeneralBackMatter() {
   
   if (backMatter[backIndex].width < 800) {
     background("white");
-    console.log("ERROR: InsertedCopy/BackMatter_" + backIndex + ".svg not found");
+    console.log("ERROR: InsertedCopy/BackMatter_" + (backIndex + 1) + ".svg not found");
     push();
       textSize(40);
       fill("red");
@@ -787,7 +786,7 @@ function drawGeneralBackMatter() {
     console.log("back page " + printIndex);
     return "(NOT FOUND) ";
   } else {
-    let path  ="InsertedCopy/BackMatter_" + backIndex + ".svg";
+    let path  ="InsertedCopy/BackMatter_" + (backIndex + 1) + ".svg";
     var temp = vectorCanvas.innerHTML;
     var tempBegin = temp.substring(0, 53);
     var tempEnd = temp.substring(53);
@@ -845,7 +844,7 @@ function drawLastBackMatter() {
   if (backMatter[backIndex].width < 800) {
     found = false;
     background("white");
-    console.log("ERROR: InsertedCopy/BackMatter_" + backIndex + ".svg not found");
+    console.log("ERROR: InsertedCopy/BackMatter_" + (backIndex + 1) + ".svg not found");
     push();
       textSize(40);
       fill("red");
@@ -854,7 +853,7 @@ function drawLastBackMatter() {
       text("NO IMAGE FOUND", width / 2, height / 2);
     pop();
   } else {
-    let path  ="InsertedCopy/BackMatter_" + backIndex + ".svg";
+    let path  ="InsertedCopy/BackMatter_" + (backIndex + 1) + ".svg";
     var temp = vectorCanvas.innerHTML;
     var tempBegin = temp.substring(0, 53);
     var tempEnd = temp.substring(53);
@@ -865,7 +864,8 @@ function drawLastBackMatter() {
   repositionButtons();
   backIndex++;
 
-  if (state != States.PREVIEWING) { //possible unnecessary if statement
+  
+  if (state == States.COMPILING) { //possible unnecessary if statement
     //noLoop();
     state = States.PREVIEWING;
     //button2.show();
@@ -909,11 +909,40 @@ function drawLastBackMatter() {
 function formatPrice(thisWine) {
   let price = "";
   for (var i = 2; i < thisWine.length; i++) {
-    price += " | " + thisWine[i];
+    //in case of multiple variant SKUs, e.g. 2021 Matan
+    if (thisWine.length > 3) {
+      if (checkVariantAvailability(thisWine, i - 2)) {
+        if (thisWine.length < i || thisWine[i] == NULL) {
+          price += " | Not Found"; 
+        } else {
+          price += " | " + thisWine[i];
+        }
+      }
+    //in base case of only one SKU
+    } else {
+      if (thisWine.length < i || thisWine[i] == NULL) {
+        price += " | Not Found"; 
+      } else {
+        price += " | " + thisWine[i];
+      }
+    }
+    //console.log("SEARCH  " + thisWine);
   }
   price = price.substring(3);
   return price;
 
+}
+
+
+
+//checks whether variant sku has available inventory
+function checkVariantAvailability(thisWine, variantNum) {
+  //console.log("SEARCH " + thisWine[0].variants[variantNum].inventory[0].availableForSaleCount);
+  let variantInventory = thisWine[0].variants[variantNum].inventory[0].availableForSaleCount;
+  if (variantInventory > 0) {
+    return true;
+  }
+  return false;
 }
 
 
@@ -1085,7 +1114,7 @@ function preparePDF() {
 
 
 //Confirms pdf print, called from html
-function printPDF() {  
+function printPDF() { 
   if (state == States.ASSEMBLING) {
     console.log("printing");
     console.log("Full PDF Contents: ");
@@ -2151,4 +2180,3 @@ user selection will use a Radio DOM object for mode, and a checkbox DOM object f
 //text in graphics bug
 //price checkbox currently has no impact, may be related to other abovc bug
 
-//try removing graphics objects and just using if conditionals in the necessary places
