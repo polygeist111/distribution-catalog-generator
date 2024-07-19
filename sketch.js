@@ -625,11 +625,13 @@ function compilePage(whichType) {
       console.log(makerMatter);
 
       console.log("printing preview controls");
+
+      /*
       let div = document.createElement('div');
       div.id = "testScript";
       let script = document.createElement('script');
       div.appendChild(script);
-      pageList.appendChild(div);
+      pageList.appendChild(div);*/
       break;
 
     default:
