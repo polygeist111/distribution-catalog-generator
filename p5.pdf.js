@@ -82,8 +82,10 @@
     */
     function PDF(p5Instance) {
         this.elements = [];
-        this.width = p5Instance.width;
-        this.height = p5Instance.height;
+        //this.width = p5Instance.width;
+        //this.height = p5Instance.height;
+        this.width = 816;
+        this.height = 1056;
         this.p5Instance = p5Instance;
     }
 

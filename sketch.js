@@ -187,7 +187,7 @@ function windowResized() {
 
   windowResized();
   */
-  console.log("RESIZE called")
+  //console.log("RESIZE called")
   if (window.innerWidth >= 1500) {
     //console.log(col1.childNodes);
     console.log("SEARCH " + col2.querySelector("#authStuff") + " " + col1.querySelector("#page_list") + " " + pageList.style.display);
@@ -394,12 +394,13 @@ function draw() {
     vectorCanvas.innerHTML = str.substring(lastInsert.length);
   } 
   clear();*/
-  console.log("passed reset");
   //console.log(document.getElementById('generation_settings').style.visibility);
   //updates user input settings
-  if (document.getElementById('generation_settings').style.display == "inline-block") {
-    readGenerationSettings();
+  if (document.getElementById('generation_settings').style.display != "none" && document.getElementById('generation_settings').style.visibility != "hidden") {
+    //console.log("SEARCH " + document.getElementById('generation_settings').style.display + " | " + document.getElementById('generation_settings').style.visibility);
+    //readGenerationSettings();
   }
+
   //resizes previewControl div to match sketch container
   if (document.getElementById('preview_controls').style.display != "none") {
     canvasObject = document.getElementById('canvas_shell').getBoundingClientRect();
@@ -428,6 +429,8 @@ function draw() {
   }
   //console.log(state);
   if (state == States.SETUP) { 
+    readGenerationSettings();
+
     //background(C7Gray);
   } else { 
     //background(white);
@@ -1788,107 +1791,7 @@ function getMakers() {
 
 
 
-//Repositions buttons in window based on location of canvas and page printout
-function repositionButtons() {
-  /*
-  var thisCanvas = document.getElementById('canvas_shell');
-  var canvasRect = thisCanvas.getBoundingClientRect();
-  var canvasX = canvasRect.left + window.scrollX;
-  var canvasY = canvasRect.top + window.scrollY;
-
-  var thisPageList = document.getElementById('page_list');
-  var pageListRect = thisPageList.getBoundingClientRect();
-  var pageListX = pageListRect.left + window.scrollX;
-  var pageListY = pageListRect.top + window.scrollY;
-
-  var thisPrinter = document.getElementById('print_button');
-  var printerRect = thisPrinter.getBoundingClientRect();
-  var printerX = printerRect.left + window.scrollX;
-  var printerY = printerRect.top + window.scrollY;
-
-  var authStuff = document.getElementById('authStuff');
-  var confirmButton = document.getElementById('confirm_generation');
-
-  var modeSelector = document.getElementById('modeSelect'); 
-
-  var priceSelector = document.getElementById('priceIncluded');
-
-  var previewControls = document.getElementById('preview_controls');
-
-  //button1.position(width * 0.5 - button1.width * 0.5,  height * -0.5 + button1.height * -0.5, "relative");
-  //console.log(document.getElementById("confirm_generation").style.visibility);
-  //console.log(document.getElementById("confirm_generation").getBoundingClientRect().height);
-  var visibility = confirmButton.style.visibility;
-  var buttonHeight = confirmButton.getBoundingClientRect().height;
-  var buttonWidth = confirmButton.getBoundingClientRect().width;
-  //console.log(buttonHeight / 2);
-  //console.log(confirmButton.style);
-  //console.log(confirmButton.getBoundingClientRect());
-  //console.log("top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2) + "px; visibility: " + visibility + "; position: absolute;");
-  //confirmButton.style = "top: " + (-1 * canvasRect.top) + "px; left: " + (-1 * canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
-  //console.log(confirmButton.getBoundingClientRect());
-  //confirmButton.style = "top: " + (canvasY + canvasRect.height / 2 - buttonHeight / 2 - canvasRect.top) + "px; left: " + (canvasX + canvasRect.width / 2 - buttonWidth / 2 - canvasRect.left) + "px; visibility: " + visibility + "; position: absolute;";
-  confirmButton.style = "top: " + (canvasY + canvasRect.height * 0.5 - buttonHeight * 0.5) + "px; left: " + (canvasX + canvasRect.width * 0.5 - buttonWidth * 0.5) + "px; visibility: " + visibility + "; position: absolute;";
-  
-  modeSelector.style = "top: " + (canvasY + confirmButton.getBoundingClientRect().bottom - 20) + "px; left: " + (canvasX + canvasRect.width * 0.5 - modeSelector.getBoundingClientRect().width * 0.5) + "px; visibility: " + visibility + "; position: absolute; color:#ED225D;";
-  
-  priceSelector.style = "visibility: visibile; margin-top: 10px;";
-
-  //section for preview controls
-  var viewPrev = document.getElementById("viewPrev");
-  var viewNext = document.getElementById("viewNext");
-  var jumpToPage = document.getElementById("pageNumIn");
-  var previewBox = previewControls.getBoundingClientRect();
-  var previewButtonHeight = 22;
-  if (jumpToPage) {
-    var jumpBox = jumpToPage.getBoundingClientRect();
-    
-    //viewPrev.style = "width: 10%; height: 45%; top: " +  (previewBox.top + (previewBox.height * 0.5) - (viewPrev.getBoundingClientRect().height * 0.5)) + "px;";
-    var jumpPageTop = viewPrev.getBoundingClientRect().top + window.scrollY - ((jumpBox.height - previewButtonHeight) * 0.5);
-    jumpToPage.style = "width: 20%; margin-left: 10px; margin-right: 10px; left: " + (previewBox.left + (previewBox.width * 0.5) - (jumpBox.width * 0.5)) + "px; height: " + previewButtonHeight + "px; top: " + jumpPageTop + "px; position: absolute;"; 
-    viewPrev.style = "width: 10%; position: absolute; left: " + (jumpBox.left - 10 - viewPrev.getBoundingClientRect().width) + "px; height: " + previewButtonHeight + "px;";
-    viewNext.style = "width: 10%; position: absolute; left: " + (jumpBox.right + 10) + "px; height: " + previewButtonHeight + "px;";
-  }
-
-  //viewNext.style = "";
-  //jumpToPage.style = "";
-  //document.getElementById("viewNext").style.width = document.getElementById("viewPrev").getBoundingClientRect().width;
-  //var newWidth = 
-  //console.log(document.getElementById("viewNext").style.width + " " + document.getElementById("viewPrev").getBoundingClientRect().width);
-
-
-  */
-  readGenerationSettings();
-  /*
-  if (pageListX >= pageListY) {
-    if (previewControls.style.display != "none") {
-      authStuff.style = "top: " + (previewControls.getBoundingClientRect().bottom + window.scrollY) + "px; margin-top: 10px";
-    } else {
-      authStuff.style = "top: " + (canvasRect.bottom + window.scrollY) + "px; margin-top: 10px";
-    }
-    console.log("bigX");
-  } else {
-    authStuff.style = "top: " + canvasY + "px; margin-top: 0px; left: " + (canvasRect.right + window.scrollX) + "px;";
-    console.log("littleX");
-  }*/
-  /*
-  console.log(window.width + " " + (canvasRect.width + pageListRect.width + 20));
-  if (window.width < canvasRect.width + pageListRect.width + 20) {
-    thisPageList.style.left = canvasRect.left;
-    thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
-  } else {
-    thisPageList.style.left = canvasRect.right;
-    thisPageList.style.top = canvasRect.top;
-  }*/
-
-  //previewControls.style.width = canvasRect.width;
-  //console.log(confirmButton.style);
-  //console.log(confirmButton.getBoundingClientRect());
-  
-}
-
-
-//when called from repositionButtons
+//reads generator settings and updates global vars
 function readGenerationSettings() {
   var modes = document.getElementById('modeSelect'); 
   var priceSelector = document.getElementById('priceIncluded');
@@ -1900,8 +1803,8 @@ function readGenerationSettings() {
       selectedMode = modes[i].value;
     }
   }
-  //console.log("selected mode is " + selectedMode);
-
+  console.log("selected mode is " + selectedMode);
+  
   //handles price checkbox availability
   if (selectedMode != "Overlays") {
     priceSelector.disabled = false;
