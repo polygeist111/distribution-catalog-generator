@@ -144,7 +144,7 @@ html, body {
   display: none;
   /*change to display: inline-block;*/
   border: 1px solid white;
-  width: 620px;
+  width: 470px;
   color: white;
   order: 2;
   margin-left: 10px;
@@ -186,7 +186,8 @@ html, body {
 }
 
 /*wide display, pageList right*/
-@media only screen and (min-width: 1500px) {
+/*must change minwidth value here and in script if changed*/
+@media only screen and (min-width: 1350px) {
   #authStuff {
     order: 2;
   }

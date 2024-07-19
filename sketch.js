@@ -188,7 +188,8 @@ function windowResized() {
   windowResized();
   */
   //console.log("RESIZE called")
-  if (window.innerWidth >= 1500) {
+  //must change innerwidth value here and in CSS if changed
+  if (window.innerWidth >= 1350) {
     //console.log(col1.childNodes);
     console.log("SEARCH " + col2.querySelector("#authStuff") + " " + col1.querySelector("#page_list") + " " + pageList.style.display);
     if (col2.querySelector("#authStuff") != null && col1.querySelector("#page_list") != null && state == States.PREVIEWING) {
@@ -614,7 +615,11 @@ function compilePage(whichType) {
       
     case 4:
       let str4 = drawTechSheets();
-      makeCheckbox("&nbsp;" + str4 + "Page " + (printIndex + 1) + ": " + pricedWineList[wineIndex - 1][0].title, 4);
+      let title = pricedWineList[wineIndex - 1][0].title;
+      if (title.substring(5, 11) == "Hofkel") {
+        title = title.substring(0, 5) + "Hofkellerei" + title.substring(47);
+      }
+      makeCheckbox("&nbsp;" + str4 + "Page " + (printIndex + 1) + ": " + title, 4);
       break;
 
     case 5:
@@ -1220,7 +1225,11 @@ function header(thisWine) {
   let thisVintage = thisWine[0].wine.vintage;
   if (thisVintage == null) { thisVintage = ""; }
   text(thisVintage, 62, 84);
-  text(makerName(thisWine[0].title), 62, 135);
+  let title = makerName(thisWine[0].title);
+  if (title.substring(0, 6) == "Hofkel") {
+    title = "Hofkellerei" + title.substring(42);
+  }
+  text(title, 62, 135);
   textFont(italFont, 20);
   text(thisWine[0].subTitle, 62, 175);
   textFont(regFont);
