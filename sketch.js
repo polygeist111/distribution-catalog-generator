@@ -1857,8 +1857,8 @@ function repositionButtons() {
   //console.log(document.getElementById("viewNext").style.width + " " + document.getElementById("viewPrev").getBoundingClientRect().width);
 
 
-  readGenerationSettings();
   */
+  readGenerationSettings();
   /*
   if (pageListX >= pageListY) {
     if (previewControls.style.display != "none") {
