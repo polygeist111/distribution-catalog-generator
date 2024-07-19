@@ -1803,7 +1803,7 @@ function readGenerationSettings() {
       selectedMode = modes[i].value;
     }
   }
-  console.log("selected mode is " + selectedMode);
+  //console.log("selected mode is " + selectedMode);
   
   //handles price checkbox availability
   if (selectedMode != "Overlays") {
@@ -1848,16 +1848,18 @@ function readGenerationSettings() {
 
   //handles price selection, auto-false if mode is overlay
   //console.log(modes[modes.length - 1].value);
-  if (modes[modes.length - 1].value == "yes") {
-    yesPrices = true;
+  //console.log(modes);
+  
+  if (priceSelector.checked != null) {
+    yesPrices = priceSelector.checked;
   } else {
-    yesPrices = false;
+    yesPrices = true;
   }
   if (priceSelector.disabled == true) {
     yesPrices = false;  
   }
-
-
+  //console.log(priceSelector.checked);
+  //console.log("Prices are " + yesPrices);
 }
 
 
