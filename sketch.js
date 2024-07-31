@@ -24,14 +24,12 @@ let wineIndex = 0;
   //container for saved pages
 var pdf;
 
-var yesOverlays = false; //tied to footer graphic, also includes maker page top right
-var yesProducts = false;
-var yesInserts = false;
+//determines generated sheet header coloration. false is standard (white text on blue background), true is ink saving (blue text on white background)
+var saveInk = false;
+//whether to include priceboxes on tech sheets
 var yesPrices = false;
 
 var printedPages = 0;
-
-var vectorsOnly = false; //likely unnecessary, check back after fixing mode selector
 
 let determiningDim;
 
@@ -116,6 +114,8 @@ function preload() {
 
 }
 
+
+
 function setup() {
   //readDir('InsertedCopy');
 
@@ -191,7 +191,7 @@ function windowResized() {
   //must change innerwidth value here and in CSS if changed
   if (window.innerWidth >= 1350) {
     //console.log(col1.childNodes);
-    console.log("SEARCH " + col2.querySelector("#authStuff") + " " + col1.querySelector("#page_list") + " " + pageList.style.display);
+    //console.log("SEARCH " + col2.querySelector("#authStuff") + " " + col1.querySelector("#page_list") + " " + pageList.style.display);
     if (col2.querySelector("#authStuff") != null && col1.querySelector("#page_list") != null && state == States.PREVIEWING) {
       col2.removeChild(authStuff);
       col1.appendChild(authStuff);
@@ -379,7 +379,6 @@ function startPressed() {
 
 
 //Draws to canvas, snaps and saves all product pages
-//The checks for vectorsOnly don't render anything but insert matter overlay if they fail
 function draw() {
   
   if(baseState == -1) {
@@ -388,19 +387,7 @@ function draw() {
   } else {
     vectorCanvas.innerHTML = baseState;
   }
-  clear();/*
-  let str = vectorCanvas.innerHTML;
-  if (lastInsert != "") {
-    //console.log("BASE: " + str);
-    vectorCanvas.innerHTML = str.substring(lastInsert.length);
-  } 
-  clear();*/
-  //console.log(document.getElementById('generation_settings').style.visibility);
-  //updates user input settings
-  if (document.getElementById('generation_settings').style.display != "none" && document.getElementById('generation_settings').style.visibility != "hidden") {
-    //console.log("SEARCH " + document.getElementById('generation_settings').style.display + " | " + document.getElementById('generation_settings').style.visibility);
-    //readGenerationSettings();
-  }
+  clear();
 
   //resizes previewControl div to match sketch container
   if (document.getElementById('preview_controls').style.display != "none") {
@@ -413,39 +400,12 @@ function draw() {
   if(document.getElementById('page_list').style.display != "none") {
     canvasObject = document.getElementById('canvas_shell').getBoundingClientRect();
     thisPageList = document.getElementById('page_list');
-    //console.log(window.innerWidth + " " + (canvasObject.width + thisPageList.getBoundingClientRect().width + 20));
-    if (window.innerWidth < canvasObject.width + thisPageList.getBoundingClientRect().width + 20) {
-      //thisPageList.style.left = canvasObject.left;
-      //thisPageList.style.top = document.getElementById('holder').getBoundingClientRect().bottom;
-      //document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + canvasObject.left + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY + 10)+ "px;";
-      //document.getElementById('authStuff').style = "display: inline-block; left: " + (canvasObject.right) + "px; top: " + (canvasObject.top - 8 + window.scrollY) + "px;";
-
-    } else {
-      //thisPageList.style.left = canvasObject.right;
-      //thisPageList.style.top = canvasObject.top;
-      //document.getElementById('page_list').style = "border: 1px solid white; display: inline-block; left: " + (canvasObject.right + 10) + "px; top: " + (canvasObject.top + window.scrollY) + "px;";
-      //document.getElementById('authStuff').style = "left: " + (canvasObject.left - 10) + "px; top: " + (document.getElementById('preview_controls').getBoundingClientRect().bottom + window.scrollY)+ "px;";
-    }
 
   }
   //console.log(state);
   if (state == States.SETUP) { 
     readGenerationSettings();
-
-    //background(C7Gray);
-  } else { 
-    //background(white);
-    //clear(); 
-
-    //yesOverlays = true; //tied to footer graphic, also includes maker page top right
-
-    //yesProducts = true;
-
-    //yesInserts = true;
-
-    //yesPrices = true;
   }
-
   
   //compiles all initial pages
   if (state == States.COMPILING) {
@@ -455,49 +415,39 @@ function draw() {
     } //DEBUGGING*/
     //draws all but last page
     //if (drawing && printIndex < definitiveLength - 1 && !allDone) {
-      let whichType = -1;
-      //front matter
-      if (printIndex < frontMatter.length) {
-        //drawFrontMatter();
-        whichType = 1;
+    let whichType = -1;
+    //front matter
+    if (printIndex < frontMatter.length) {
+      //drawFrontMatter();
+      whichType = 1;
       
-        //maker matter
-      } else if (printIndex == 2) { 
-        //noLoop(); 
-      } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
-        //drawMakerMatter();
-        whichType = 2;
+      //maker matter
+    } else if (printIndex == 2) { 
+      //noLoop(); 
+    } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
+      //drawMakerMatter();
+      whichType = 2;
         
-        //back matter
-      } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
-        //drawGeneralBackMatter();
-        whichType = 3;
+      //back matter
+    } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
+      //drawGeneralBackMatter();
+      whichType = 3;
         
-        //tech sheets
-      } else if (wineIndex < pricedWineList.length) {
-        //drawTechSheets();
-        whichType = 4;
-        
-        //last back matter
-      } else if (wineIndex == pricedWineList.length && backIndex == backMatter.length - 1) {
-        whichType = 5;
-      }
+      //tech sheets
+    } else if (wineIndex < pricedWineList.length) {
+      //drawTechSheets();
+      whichType = 4;
       
-      compilePage(whichType); 
-      if (whichType != 5) {
-        printIndex++;
-      }
+      //last back matter
+    } else if (wineIndex == pricedWineList.length && backIndex == backMatter.length - 1) {
+      whichType = 5;
+    }
+    
+    compilePage(whichType); 
+    if (whichType != 5) {
+      printIndex++;
+    }
   }
-    /*
-    //Closing save (after last page)
-  if (allDone) {
-    pdf.save();
-    noLoop();
-    allDone = false
-    printReady = false;
-    reStart();
-
-  }*/
 
   if (state == States.PREVIEWING) {
     previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
@@ -582,16 +532,7 @@ function compilePage(whichType) {
     }
     pageIncluded.push([true, whichType, specialInd, -1]);
   }
-  //CODE: this section is likely useless
-  if (yesInserts) {
-    console.log("adding insert");
-  }
-  if (yesProducts) {
-    console.log("adding product");
-  }
-  if (yesOverlays) {
-    console.log("adding overlay");
-  }
+
   if (yesPrices) {
     console.log("adding this wine price");
   }
@@ -646,29 +587,6 @@ function compilePage(whichType) {
       break;
 
   }
-  /*
-  console.log("writing to screen");
-  //saves to pdf if in confirmation loop
-  if (state == States.ASSEMBLING && pageIncluded[printedPages][0]) {
-    if (!yesOverlays && yesProducts) {
-      if (whichType == 4) {
-        pdf.nextPage();
-        printedPages++;
-        console.log("saving product page to pdf");
-      } else {
-        whichType = -1;
-      }
-    } else {
-      if (whichType != 5 ) {
-        pdf.nextPage();
-        console.log("saving page to pdf");
-      } else {
-        console.log("final page to pdf");
-      }
-      printedPages++;
-    }
-  }*/
-  //console.log("list: " + document.getElementById('page_list').innerHTML);
 }
 
 
@@ -749,12 +667,6 @@ function drawFrontMatter() {
     console.log("front page " + printIndex);
     return "";
   }
-  //let img;
-  //if (!vectorsOnly) {
-    //img = frontMatter[printIndex];
-    //img = resizeToPrint(img);
-    //image(img, 0, 0);
-  //}
 }
 
 
@@ -869,15 +781,6 @@ function drawTechSheets() {
   //printIndex--;
   //pdf.nextPage();
   console.log("tech sheet page " + printIndex);
-  //triggers end of cycle if no inserts are printed
-  if ((!yesOverlays && yesProducts) && wineIndex == pricedWineList.length - 1 && state != States.PREVIEWING) {
-    //noLoop();
-    state = States.PREVIEWING;
-    //button2.show();
-    document.getElementById('print_button').style.display = 'block'
-    document.getElementById('page_list').style.display = "inline-block";
-    windowResized();
-  }
   return "";
 }
 
@@ -921,8 +824,8 @@ function drawLastBackMatter() {
   backIndex++;
 
   
-  if (state == States.COMPILING) { //possible unnecessary if statement
-    //noLoop();
+  if (state == States.COMPILING) {
+    console.log("beginning preview");
     state = States.PREVIEWING;
     //button2.show();
     document.getElementById('print_button').style.display = 'block'
@@ -1077,22 +980,14 @@ function reStart() {
   noLoop();
   pdf = createPDF();
 
-  yesOverlays = false;
-  yesProducts = false;
-  yesInserts = false;
+  saveInk = false;
   yesPrices = false;
-
-  document.getElementById('Full Catalog').checked = "true";
-  document.getElementById('priceIncluded').checked = "true";
-  document.getElementById('priceIncluded').disabled = "false";
   
   printedPages = 0;
-
-  vectorsOnly = false;
-
   populateProducts("start");
   document.getElementById("generation_settings").style.display = "none";
-  document.getElementById('printer_button').style.display = "none";
+  
+  document.getElementById('print_button').style.display = "none";
   document.getElementById('page_list').innerHTML = "";
   document.getElementById('page_list').style.display = "none";
   
@@ -1101,11 +996,11 @@ function reStart() {
   lastMaker = "";
   makerIndex = 0;
   backIndex = 0;
-
+  
   lastToPrint = 0;
-
+  
   console.log("reStarted");
-
+  
   windowResized();
 }
 
@@ -1177,7 +1072,6 @@ function printPDF() {
     console.log("Full PDF Contents: ");
     console.log(pageIncluded);
     console.log(pdf);
-    //if (!yesOverlays && yesProducts) {}
     pdf.endRecord();
     pdf.save();
     
@@ -1202,8 +1096,7 @@ function loadImages() {
   console.log("Definitive Length: " + definitiveLength);
 
   setTimeout(function() {
-     document.getElementById("generation_settings").style.display = "flex";
-    
+    document.getElementById("generation_settings").style.display = "flex";
   }, 2000);
   
 }
@@ -1214,10 +1107,24 @@ function loadImages() {
 function header(thisWine) {
   textStyle(NORMAL);
   //header
-  fill(ArchBlue);
+  if (saveInk) {
+    push();
+      fill(ArchBlue);
+      stroke(ArchBlue);
+      strokeWeight(5);
+      line(40, 243, 776, 243);
+    pop();
+    fill(white);
+  } else {
+    fill(ArchBlue);
+  }
   rect(0, 0, 816, 244);
   
-  fill('#FFFFFF');
+  if (saveInk) {
+    fill(ArchBlue);
+  } else {
+    fill(white);
+  }
   noStroke();
   
   textAlign(LEFT);
@@ -1385,7 +1292,11 @@ function makerWineList(thisImg, blueIn, thisHeight) {
   console.log("lastBlue = " + lastBlue);
 
   //fills box
-  fill(ArchBlue);
+  if (saveInk) {
+    fill(white);
+  } else {
+    fill(ArchBlue);
+  }
   rectMode(CORNER);
   rect(426, 0, 390, lastBlue);
 
@@ -1420,8 +1331,11 @@ function makerWineList(thisImg, blueIn, thisHeight) {
   //textFont(regFont);
   //console.log(textWidth(thisContent[0].substring(0, thisContent[0].indexOf(":") + 1)));
   //console.log(textWidth(" "));
-  //console.log(thisContent.length);
-  fill(white);
+  if (saveInk) {
+    fill(ArchBlue);
+  } else {
+    fill(white);
+  }
   for (var i = 0; i <= thisContent.length; i++) {
 
     //sets text block height
@@ -1463,15 +1377,14 @@ function makerWineList(thisImg, blueIn, thisHeight) {
   //totalHeight *= -1;
   totalHeight = (lastBlue * 0.5) - (totalHeight * 0.5) - 5;
   console.log("adjusted total height: " + totalHeight); 
-
-
+  
   for (var i = 0; i <= thisContent.length; i++) {
-
+    
     //sets text block height
     if (lastBox == null) {
       thisHeight = 0;
       textFont(boldFont, boldFontSize);
-      value = "Wines"
+      value = "Wines";
     } else {
       thisHeight = 0;
       textFont(regFont, regFontSize);
@@ -1481,16 +1394,16 @@ function makerWineList(thisImg, blueIn, thisHeight) {
     //if (i == 1) { thisHeight += 5; }
     thisHeight += textHeight(value, maxWidth) + 10;
     //console.log(thisHeight);
-
+    
     totalHeight += thisHeight;
     //console.log(totalHeight);
-
+    
     //assigns key, value, and spacer
     //textFont(boldFont);
     //key = thisContent[i].substring(0, thisContent[i].indexOf(":") + 1);
     
     //value = thisContent[i].substring(thisContent[i].indexOf(":") + 1);
-
+    
     //Prints descriptive text
     //textFont(boldFont);
     //text(thisContent[i][0], left, totalHeight, maxWidth, maxHeight);
@@ -1501,6 +1414,8 @@ function makerWineList(thisImg, blueIn, thisHeight) {
     console.log(value + " " + left + " " + totalHeight + " " + maxWidth + " " + maxHeight);
     lastBox = text(value, left, totalHeight - thisHeight, maxWidth, maxHeight);
   }
+
+  fill(white);
 }
 
 
@@ -1802,73 +1717,27 @@ function getMakers() {
 
 //reads generator settings and updates global vars
 function readGenerationSettings() {
-  var modes = document.getElementById('modeSelect'); 
+  var inkSelector = document.getElementById('saveInk');
   var priceSelector = document.getElementById('priceIncluded');
-  var selectedMode;
-  //console.log(document.getElementById('modeSelect'));
 
-  for (var i = 0; i < modes.length - 1; i++) {
-    if (modes[i].checked) {
-      selectedMode = modes[i].value;
-    }
-  }
-  //console.log("selected mode is " + selectedMode);
-  
-  //handles price checkbox availability
-  if (selectedMode != "Overlays") {
-    priceSelector.disabled = false;
+  //handles ink saver selection
+  if (priceSelector.checked != null) {
+    saveInk = inkSelector.checked;
   } else {
-    priceSelector.disabled = true;
+    saveInk = false;
   }
 
-  //handles mode logic
-  switch (selectedMode) {
-    case "Full Catalog":
-      yesOverlays = true;
-      yesInserts = true;
-      yesProducts = true;
-      yesPrices = false;
-      //console.log("mode is full");
-      break;
-    case "Print-Ready Kit":
-      yesOverlays = true;
-      yesInserts = false;
-      yesProducts = true;
-      //console.log("mode is kit");
-      break;
-    case "Tech Sheets":
-      yesOverlays = false;
-      yesInserts = false;
-      yesProducts = true;
-      yesPrices = false; 
-      //console.log("mode is sheets");
-      break;
-    case "Overlays":
-      yesOverlays = true;
-      yesInserts = false;
-      yesProducts = false;
-      yesPrices = false;
-      //console.log("mode is overlay");
-      break;
-    default:
-      reStart();
-      return;
-  }
-
-  //handles price selection, auto-false if mode is overlay
-  //console.log(modes[modes.length - 1].value);
-  //console.log(modes);
-  
+  //handles price selection
   if (priceSelector.checked != null) {
     yesPrices = priceSelector.checked;
   } else {
     yesPrices = true;
   }
-  if (priceSelector.disabled == true) {
-    yesPrices = false;  
-  }
-  //console.log(priceSelector.checked);
-  //console.log("Prices are " + yesPrices);
+  /*
+  console.log(inkSelector.checked);
+  console.log("Ink saving is " + saveInk);
+  console.log(priceSelector.checked);
+  console.log("Prices are " + yesPrices);*/
 }
 
 

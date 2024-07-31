@@ -175,7 +175,7 @@ html, body {
   margin-left: 10px;
 }
 
-#priceIncluded {
+input[type="checkbox"] {
   margin-top: 10px;
 }
 

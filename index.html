@@ -51,9 +51,10 @@
                   <button id="confirm_generation" onclick="startPressed()">Generate Sheets</button>
                   <form id="modeSelect">
                     <fieldset>
-                      <legend>Choose output mode</legend>
-        
+                      <legend>Choose output options</legend>
+                     
                       <!--Mode selector radio-->
+                      <!--
                       <input type="radio" name="contentMode" id="Full Catalog" value="Full Catalog" checked="true"/>
                       <label for="Full Catalog">Full Catalog</label><br> 
                       <input type="radio" name="contentMode" id="Print-Ready Kit" value="Print-Ready Kit"/>
@@ -62,10 +63,18 @@
                       <label for="Tech Sheets">Tech Sheets</label><br>
                       <input type="radio" name="contentMode" id="Overlays" value="Overlays"/>
                       <label for="Overlays">Overlays</label><br>
-        
+                      -->
+                      
+                      <!--Ink Saver-->
+                      <div>
+                        <input type="checkbox" name="saveInk" id="saveInk"/>
+                        <label for="saveInk">Save Ink?</label>
+                      </div>
                       <!--Price inclusion-->
-                      <input type="checkbox" name="priceIncluded" id="priceIncluded" value="yes" defaultChecked="true"/>
-                      <label for="priceIncluded">Include Price?</label>
+                      <div>
+                        <input type="checkbox" name="priceIncluded" id="priceIncluded" checked/>
+                        <label for="priceIncluded">Include Price?</label>
+                      </div>
         
                     </fieldset>
                   </form>
