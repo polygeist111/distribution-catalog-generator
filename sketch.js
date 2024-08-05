@@ -1,5 +1,3 @@
-let button1;
-let button2; //depracated
 const productURL = "https://api.commerce7.com/v1/product?cursor=";
 const appID = "distribution-catalog-generator";
 const ASK = "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0cHF1eThoeWtiS3ZGV0x2cGhaY2MyS2xBY3lnbDl0NzlKQ1ZiMTB2UDRNZERqZVBFbG8=";
@@ -211,7 +209,7 @@ function windowResized() {
 
 
 
-//Recursively fills produtsList with all products in C7
+//Recursively fills productsList with all products in C7
 function populateProducts(cursorIn) {
   fetchWines(productURL + cursorIn)
   .then(m => { 
@@ -267,7 +265,11 @@ function sortWineList() {
   wineList.sort((a,b) => makerName(a.title).localeCompare(makerName(b.title)));
   wineList.sort(function (a,b) {
     if (makerName(a.title).localeCompare(makerName(b.title)) == 0) {
-      return wineName(a).localeCompare(wineName(b));
+      //return wineName(a).localeCompare(wineName(b));
+      if (wineName(a).localeCompare(wineName(b) == 0)) {
+        return wineVintage(a.title).localeCompare(wineVintage(b.title));
+      }
+      return 0;
     }
     return 0;
   });
@@ -305,6 +307,15 @@ function makerName(name) {
     return name.substring(5);
   } else return name;
 
+}
+
+
+
+//Returns wine vintage from title
+function wineVintage(name) {
+  if (name.substring(0,1) === "2") {
+    return name.substring(0, 5);
+  } else return "NV";
 }
 
 
@@ -1520,6 +1531,11 @@ function handleSpecialCharacters(textIn) {
   //Raised tone e
   while (textIn.indexOf("&eacute;") != -1) {
     textIn = textIn.substring(0, textIn.indexOf("&eacute;")) + "é" + textIn.substring(textIn.indexOf("&eacute;") + 8);
+  }
+
+  //Down tone e
+  while (textIn.indexOf("&egrave;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&egrave;")) + "è" + textIn.substring(textIn.indexOf("&egrave;") + 8);
   }
 
   //N dash

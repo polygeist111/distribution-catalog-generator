@@ -119,7 +119,6 @@
         }
       }
       
-      //Print the names and majors of students in a sample spreadsheet: 
       //https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
       async function getPrices() {
         let response;
@@ -149,12 +148,4 @@
         //console.log(priceResult[2][1]);
         //console.log("SEARCH " + priceResult);
         filterPrices(priceResult);
-        /*
-        const output = range.values.reduce(
-            (str, row) => `${str}${row[0]}, ${row[1]}\n`,
-            'SKU, Trade Price:\n');
-        document.getElementById('content').innerText = output;
-        */
-        //content.html(output);
-
       }
