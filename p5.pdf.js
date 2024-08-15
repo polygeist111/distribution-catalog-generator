@@ -47,11 +47,13 @@
      */
     var print = function(filename, elements, styles) {
         var iframe = document.createElement("iframe");
+        iframe.id = "printingFrame";
         iframe.height = 0;
         iframe.width = 0;
         document.body.appendChild(iframe);
         var doc = iframe.contentDocument || iframe.contentWindow.documen;
         var win = iframe.contentWindow;
+        //console.log(win);
 
         var style = doc.createElement('style');
         styles = styles.join('\n');
@@ -68,10 +70,15 @@
         document.title = filename;
         doc.title = filename;
 
+        //console.log("calling window print");
         win.print(); // note that window.print might be overridden by p5.js
 
         document.title = _title;
-        iframe.remove();
+        //iframe.remove();
+        //chrome update broke original ^ line :(
+        /*setTimeout(function() {
+            iframe.remove();
+        }, 500);*/
     };
 
    /**

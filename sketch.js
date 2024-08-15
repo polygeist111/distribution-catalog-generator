@@ -352,6 +352,13 @@ function wineName(wine) {
 
 //Handles start button input
 function startPressed() {
+  //removes prior printing iframe if present
+  setTimeout(function() {
+    if (document.getElementById("printingFrame")) {
+      document.getElementById("printingFrame").remove();
+    }
+  }, 500);
+
   fill(white);
   resizeCanvas(816, 1056);
   //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
@@ -465,6 +472,10 @@ function draw() {
   }
 
   if (state == States.ASSEMBLING) {
+    if (frameRate() > 1) {
+      console.log("slowdown");
+      //frameRate(.5);
+    }
     if (lastToPrint == -1) {
       reStart();
     }
@@ -1013,6 +1024,7 @@ function reStart() {
   console.log("reStarted");
   
   windowResized();
+  frameRate(60);
 }
 
 
@@ -1558,14 +1570,25 @@ function handleSpecialCharacters(textIn) {
     textIn = textIn.substring(0, textIn.indexOf("&ouml;")) + "ö" + textIn.substring(textIn.indexOf("&ouml;") + 6);
   }
 
+  //o circumflex
+  while (textIn.indexOf("&ocirc;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&ocirc;")) + "ô" + textIn.substring(textIn.indexOf("&ocirc;") + 7);
+  }
+
   //a umlauts
   while (textIn.indexOf("&auml;") != -1) {
     textIn = textIn.substring(0, textIn.indexOf("&auml;")) + "ä" + textIn.substring(textIn.indexOf("&auml;") + 6);
   }
 
+  //a circumflex
+  while (textIn.indexOf("&acirc;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&acirc;")) + "â" + textIn.substring(textIn.indexOf("&acirc;") + 7);
+  }
+
+
   //fractional 1/2
   while (textIn.indexOf("&frac12;") != -1) {
-    textIn = textIn.substring(0, textIn.indexOf("&frac12;")) + "½" + textIn.substring(textIn.indexOf("&frac12;") + 6);
+    textIn = textIn.substring(0, textIn.indexOf("&frac12;")) + "½" + textIn.substring(textIn.indexOf("&frac12;") + 8);
   }
 
   //O umlauts
@@ -1573,9 +1596,19 @@ function handleSpecialCharacters(textIn) {
     textIn = textIn.substring(0, textIn.indexOf("&Ouml;")) + "Ö" + textIn.substring(textIn.indexOf("&Ouml;") + 6);
   }
 
+  //O circumflex
+  while (textIn.indexOf("&Ocirc;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Ocirc;")) + "Ô" + textIn.substring(textIn.indexOf("&Ocirc;") + 7);
+  }
+
   //A umlauts
   while (textIn.indexOf("&Auml;") != -1) {
     textIn = textIn.substring(0, textIn.indexOf("&Auml;")) + "Ä" + textIn.substring(textIn.indexOf("&Auml;") + 6);
+  }
+
+  //A circumflex
+  while (textIn.indexOf("&Acirc;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Acirc;")) + "Â" + textIn.substring(textIn.indexOf("&Acirc;") + 7);
   }
 
   //U umlauts
@@ -1592,8 +1625,22 @@ function handleSpecialCharacters(textIn) {
   while (textIn.indexOf("&amp;") != -1) {
     textIn = textIn.substring(0, textIn.indexOf("&amp;")) + "&" + textIn.substring(textIn.indexOf("&amp;") + 5);
   }
+
+  //Superscript 2
+  while (textIn.indexOf("&sup2;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&sup2;")) + "²" + textIn.substring(textIn.indexOf("&sup2;") + 6);
+  }
   
   return textIn;
+
+  /*
+  Notes for dad's review:
+  check appelations/standardize syntax there
+  More consistent tone in Location details
+  More detail in mant location/vinification/pairings
+  What is convention on spelling vs typing numbers?
+  Reshoot Kobler Grauburgunder "Klausner"
+  */
 }
 
 
