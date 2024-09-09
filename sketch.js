@@ -12,6 +12,8 @@ let allImages = [];
 let frontMatter = [];
 let makerMatter = [];
 let backMatter = [];
+const FRONTLENGTH = 4; //length of front inserts
+const BACKLENGTH = 8; //length of back inserts
 let makers = [];
 let allInsertOverlays = [];
 
@@ -117,9 +119,9 @@ function preload() {
 function setup() {
   //readDir('InsertedCopy');
 
-  frontMatter.splice(0, 3);
-  makerMatter.splice(0, 23);
-  backMatter.splice(0, 8);
+  //frontMatter.splice(0, 4);
+  //makerMatter.splice(0, 23);
+  //backMatter.splice(0, 9);
   //console.log(frontMatter);
   //console.log(makerMatter);
   //console.log(backMatter);
@@ -816,11 +818,12 @@ function drawLastBackMatter() {
   //image(img, 0, 0);
 
   //fix footers
+  /* no footer while map is back page
   if (backIndex < 2) {
     footer(243, 0);
   } else {
     footer(0, 0);
-  }
+  }*/
   var found = true;
   if (backMatter[backIndex].width < 800) {
     found = false;
@@ -1025,6 +1028,7 @@ function reStart() {
   
   windowResized();
   frameRate(60);
+  //location.reload();
 }
 
 
@@ -1135,7 +1139,7 @@ function header(thisWine) {
       fill(ArchBlue);
       stroke(ArchBlue);
       strokeWeight(5);
-      line(40, 243, 776, 243);
+      line(60, 243, 756, 243);
     pop();
     fill(white);
   } else {
@@ -1255,6 +1259,7 @@ function writeBody(thisWine) {
 
 //Generates footer
 function footer(leftSide, rightSide) {
+  strokeWeight(2);
   //console.log("Page num: " + printIndex);
   if (leftSide == 0) { leftSide = 60; }
   if (rightSide == 0) { rightSide = 756; }
@@ -1714,7 +1719,7 @@ function loadMatter() {
   frontMatter = [];
   makerMatter = [];
   backMatter = [];
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < FRONTLENGTH; i++) {
     var toPush = (loadImage('InsertedCopy\\FrontMatter_' + (i + 1) + '.svg'));
     frontMatter.push(toPush);
   }
@@ -1734,7 +1739,7 @@ function loadMatter() {
   console.log(makerMatter);
   
   //loads back matter
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < BACKLENGTH; i++) {
     var toPush = (loadImage('InsertedCopy\\BackMatter_' + (i + 1) + '.svg'));
     backMatter.push(toPush);
   }
@@ -2047,7 +2052,7 @@ function changeAllChecked(e) {
 
 
 
-//creates blocking program delay
+//creates blocking program delay (unused)
 // from https://www.sitepoint.com/delay-sleep-pause-wait/
 function sleep(milliseconds) {
   const date = Date.now();
@@ -2074,7 +2079,7 @@ user selection will use a Radio DOM object for mode, and a checkbox DOM object f
 */
 
 
-//Remove button2
-//text in graphics bug
-//price checkbox currently has no impact, may be related to other abovc bug
+//Fix margins on table of contents page, as well as upper vertical line in inksaver mode
+
+
 
