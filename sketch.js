@@ -305,6 +305,14 @@ function sortWineList() {
 
 //Returns wine title without vintage
 function makerName(name) {
+  if (name.includes("Typ")) {
+    let spaceModifier = 3;
+    if (name.indexOf(":") >= 0) {
+      spaceModifier++;
+    }
+    console.log("SEARCH: " + "Archetyp" + name.substring(name.indexOf("Typ") + spaceModifier));
+    return "Archetyp" + name.substring(name.indexOf(("Typ" + spaceModifier)));
+  }
   if (name.substring(0,1) === "2") {
     return name.substring(5);
   } else return name;
