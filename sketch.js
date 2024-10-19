@@ -151,6 +151,7 @@ function setup() {
   pageList = document.getElementById("page_list");
 
   windowResized();
+  reStart();
 }
 
 
@@ -236,8 +237,8 @@ async function fetchWines(url = "") {
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Basic Y2F0YWxvZy1nZW5lcmF0b3ItaW50ZWdyYXRpb24tdGVzdDpoS00wN01LcHE0aHVhZ2tMRHVrQ3FjRnU1R1FBTWVORUM2dWVpRU1ma09EdGQwUmFhNVYxZWlQRVhCaWtESDM5",
-      "Tenant": "archetyp",
+      "Authorization": "Basic ZGlzdHJpYnV0aW9uLWNhdGFsb2ctZ2VuZXJhdG9yOmNGSGxOS0g5SGp6dWM0cHF1eThoeWtiS3ZGV0x2cGhaY2MyS2xBY3lnbDl0NzlKQ1ZiMTB2UDRNZERqZVBFbG8=",
+      "Tenant": "archetyp-distribution",
     },
   });
   const parsedJSON = await response.json();
@@ -252,8 +253,19 @@ async function fetchWines(url = "") {
 //Filters productList to wineList, making sure only available wines and bundles are included
 function populateWineList() {
   productList.forEach(item => {
+    //check if available on web
     if(item.webStatus === "Available" && (item.type === "Wine" /*|| item.type === "Bundle"*/)) { 
-      append(wineList, item) } 
+      //check if still in stock
+      let hasInventory = false;
+      for (var i = 0; i < item.variants.length; i++) {
+        if (item.variants[i].inventory[0].availableForSaleCount > 0) {
+          hasInventory = true;
+        }
+      }
+      if (hasInventory) {
+        append(wineList, item) 
+      } 
+    }
   });
   sortWineList();
 }
@@ -297,7 +309,7 @@ function sortWineList() {
   }
   console.log(pricedWineList);
   getMakers();
-  if (document.getElementById('authorize_button').innerText == "Refresh") { getPrices(); }
+  filterPrices();
   loop();
 }
 
@@ -528,15 +540,12 @@ function draw() {
     fill('#ED225D');
     textSize(30);
     textAlign(CENTER);
-    if (document.getElementById('authorize_button').innerText == "Refresh") { 
-      push();
-        noStroke();
-        textFont(regFont);
-        text("Press the button to continue", width * 0.5, height * 0.4);
-      pop();
-    } else {
-      text("Please sign in to Google to continue", width * 0.5, height * 0.4);
-    }
+    push();
+      noStroke();
+      textFont(regFont);
+      text("Press the button to continue", width * 0.5, height * 0.4);
+    pop();
+
   }
 }
 
@@ -903,7 +912,9 @@ function formatPrice(thisWine) {
   for (var i = 2; i < thisWine.length; i++) {
     //in case of multiple variant SKUs, e.g. 2021 Matan
     if (thisWine.length > 3) {
+      //console.log("SEARCH: " + thisWine);
       if (checkVariantAvailability(thisWine, i - 2)) {
+        //console.log("Available")
         if (thisWine.length < i || thisWine[i] == null) {
           price += " | Not Found"; 
         } else {
@@ -1043,27 +1054,20 @@ function reStart() {
 
 //Applies trade prices (for all variants) to their correct places in pricedWineList array, automatically skips over unavailable wines. 
 //Trade price sheet must be correctly sorted and have accurate SKUs
-function filterPrices(priceIn) {
-  console.log(priceIn);
+function filterPrices() {
   var winDex = 0;
   //iterates across pricedWineList
   for (var i = 0; i < pricedWineList.length; i++) {
     //iterates through each variant for a given entry in pricedWineList
     for (var s = 0; s < pricedWineList[i][0].variants.length; s++) {
-      //Skips past nonmatching entries
-
-      //if an error is thrown in this code, ensure than the file Archetyp Stocklist for Retail/Restaurant (on the TradingPriceConcise page) is appropriately organized
-      console.log(priceIn[winDex][0] + " " + (pricedWineList[i][0].variants[s].sku));
-      while (priceIn[winDex][0] != (pricedWineList[i][0].variants[s].sku)) {
-        console.log("entered loop");
-        winDex++;
-      }
       //appends price to correct array slot for given wine in pricedWineList
-      if (priceIn[winDex][0] == (pricedWineList[i][0].variants[s].sku)) {
-        console.log("Added " + priceIn[winDex][0] + " " + pricedWineList[i][0].variants[s].sku);
-        pricedWineList[i][2 + s] = priceIn[winDex][1];
-        winDex++;
+      let rawPrice = pricedWineList[i][0].variants[s].price;
+      if (rawPrice != "NA") {
+        rawPrice = rawPrice + "";
+        rawPrice = "$" + rawPrice.substring(0, rawPrice.length - 2) + "." + rawPrice.substring(rawPrice.length - 2);
       }
+      pricedWineList[i][2 + s] = rawPrice;
+      winDex++;
     }
   }
   loadImages();
