@@ -16,6 +16,39 @@ const FRONTLENGTH = 4; //length of front inserts
 const BACKLENGTH = 8; //length of back inserts
 let makers = [];
 let allInsertOverlays = [];
+let contents = [];
+
+let wineryRegions = [
+  ["Archetyp", "Steiermark, Austria"],
+  ["Cave de l'Orlaya", "Valais, Switzerland"],
+  ["Cave Mandolé", "Valais, Switzerland"],
+  ["Cellier de la Baraterie", "Savoie, France"],
+  ["Domaine Céline Jacquet", "Savoie, France"],
+  ["Eichenstein", "Südtirol / Alto Adige, ltaly"],
+  ["Fischer", "Steiermark / Styria, Austria"],
+  ["Frauwallner", "Steiermark / Styria, Austria"],
+  ["GraWü", "Trentino-Alto Adige, Austria"],
+  ["Gump Hof", "Südtirol / Alto Adige, Italy"],
+  ["Hofkellerei of the Prince of Liechtenstein", "Vaduz, Liechtenstein"],
+  ["Hofstätter", "Tramin / Alto Adige, ltaly"],
+  ["Kegley & Lexer", "Kärnten / Carinthia, Austria"],
+  ["Kobler", "Südtirol / Alto Adige, Italy"],
+  ["Kränzelhof", "Südtirol / Alto Adige, ltaly"],
+  ["Lackner-Tinnacher", "Steiermark / Styria, Austria"],
+  ["Marinushof", "Südtirol / Alto Adige, ltaly"],
+  ["Mayer am Pfarrplatz", "Vienna, Austria"],
+  ["Muster Gamlitz", "Steiermark / Styria, Austria"],
+  ["Pfitscher", "Südtirol / Alto Adige, Italy"],
+  ["Pianta Grossa", "Valle d'Aosta, Italy"],
+  ["Steinbock", "Mosel, Germany"],
+  ["Sternberg", "Kärnten / Carinthia, Austria"],
+  ["Stroblhof", "Südtirol / Alto Adige, Italy"],
+  ["Thomas Dorfmann", "Südtirol / Alto Adige, Italy"],
+  ["Vignali Varàs", "Trentino, Italy"],
+  ["Vinodea", "Kremstal, Austria"],
+  ["Vulgo Ritter", "Kärnten / Carinthia, Austria"],
+  ["Winkler-Hermaden", "Steiermark / Styria, Austria"]
+]
 
   //index within pricedWineList
 let wineIndex = 0;
@@ -322,7 +355,7 @@ function makerName(name) {
     if (name.indexOf(":") >= 0) {
       spaceModifier++;
     }
-    console.log("SEARCH: " + "Archetyp" + name.substring(name.indexOf("Typ") + spaceModifier));
+    //console.log("SEARCH: " + "Archetyp" + name.substring(name.indexOf("Typ") + spaceModifier));
     return "Archetyp" + name.substring(name.indexOf(("Typ" + spaceModifier)));
   }
   if (name.substring(0,1) === "2") {
@@ -484,6 +517,18 @@ function draw() {
     }
     
     compilePage(whichType); 
+    //CODE: this is a patch fix for the compilation UX--take the time to edit page renderers to only write to page during assembly
+    clear();
+    background(C7Gray);
+    push();
+      fill('#ED225D');
+      textSize(30);
+      textAlign(CENTER);
+      noStroke();
+      textFont(regFont);
+      text("Wait for compilation", width * 0.5, height * 0.4);
+    pop();
+
     if (whichType != 5) {
       printIndex++;
     }
@@ -571,7 +616,8 @@ function compilePage(whichType) {
     } else if (whichType == 3 || whichType == 5) {
       specialInd = backIndex;
     }
-    pageIncluded.push([true, whichType, specialInd, -1]);
+    pageIncluded.push([true, whichType, specialInd, -1, null, null]);
+
   }
 
   if (yesPrices) {
@@ -681,12 +727,14 @@ function previewPage(thisPageNum, whichType, specialInd) {
 
 
 function drawFrontMatter() {
+  //fix footers
   if (printIndex != 0) {
     footer(0, 0);
   }
   //let exists = await urlExists(path);
-  //fix footers
-  if (frontMatter[printIndex].width < 800) {
+  if (printIndex == FRONTLENGTH - 1 && state == States.ASSEMBLING) {
+    drawTableOfContents();
+  } else if (frontMatter[printIndex].width < 800) {
     background("white");
     console.log("ERROR: InsertedCopy/FrontMatter_" + (printIndex + 1) + ".svg not found");
     push();
@@ -708,6 +756,93 @@ function drawFrontMatter() {
     console.log("front page " + printIndex);
     return "";
   }
+}
+
+
+function drawTableOfContents() {
+  console.log("SEARCH: drawing contents")
+  //draw footer
+  footer(0, 0);
+
+  //load contents array
+  let frontPushed = false;
+  let eventsPushed = false;
+  let pressPushed = false;
+  let trueCount = 0;
+  //write line
+  for (var i = 0; i < pageIncluded.length; i++) {
+    let thisPage = pageIncluded[i];
+    if (thisPage[0]) {
+      trueCount++;
+      //about us
+      let thisWinery = thisPage[5];
+      if (!frontPushed && i > 0 && i < FRONTLENGTH - 1) {
+        contents.push(["About Us", null, trueCount]);
+        frontPushed = true;
+      }
+      //table of contents
+      else if (i == FRONTLENGTH - 1) {
+        contents.push(["Table of Contents", null, trueCount]);
+      }
+      //wineries/tech sheets
+      else if (i >= FRONTLENGTH && thisWinery != pageIncluded[i - 1][5] && thisWinery != null) {
+        if (thisWinery == "Fischer Weingut") {
+          thisWinery = "Fischer";
+        } else if (thisWinery == "Hofkellerei") {
+          thisWinery = "Hofkellerei of the Prince of Liechtenstein";
+        }
+        contents.push([thisWinery, getWineryRegion(thisWinery), trueCount]);
+      }
+      //events
+      if (!eventsPushed && thisPage[1] == 3 && thisPage[2] < 2) {
+        contents.push(["Events", null, trueCount]);
+        eventsPushed = true;
+      }
+      //press
+      else if (!pressPushed && thisPage[1] == 3 && thisPage[2] > 1) {
+        contents.push(["Press", null, trueCount]);
+        pressPushed = true;
+      }
+      //map
+      else if (i == pageIncluded.length - 1) {
+        contents.push(["Wine Map of the Alps", null, trueCount]);
+      }
+    }
+  }
+
+  //write out contents
+  let top = 102;
+  let left = 62;
+  let right = 754;
+
+  textSize(16);
+  noStroke();
+  fill(ArchBlue);
+
+  for (var i = 0; i < contents.length; i++) {
+    //winery/title
+    let line = contents[i];
+    textAlign(LEFT, TOP);
+    textFont(regFont);
+    let title = line[0];
+    if (line[1] != null) {
+      title += ",";
+    }
+    text(title, left, top);
+
+    //region
+    if (line[1] != null) {
+      textFont(italFont);
+      text(line[1], left + textWidth(title + "    "), top);
+    }
+
+    //page #
+    textAlign(RIGHT, TOP);
+    textFont(regFont);
+    text(line[2], right, top);
+    top += 24;
+  }
+  textAlign(LEFT, TOP);
 }
 
 
@@ -1012,6 +1147,7 @@ function reStart() {
   allPages = [];
   allImages = [];
   allInsertOverlays = [];
+  contents = [];
 
   wineIndex = 0;
   state = States.SETUP;
@@ -1099,6 +1235,7 @@ function preparePDF() {
     temp--;
   }
   lastToPrint = temp;
+  console.log(pageIncluded);
   console.log("Last to print: " + lastToPrint);
 }
 
@@ -1602,6 +1739,10 @@ function handleSpecialCharacters(textIn) {
     textIn = textIn.substring(0, textIn.indexOf("&acirc;")) + "â" + textIn.substring(textIn.indexOf("&acirc;") + 7);
   }
 
+  //a grave
+  while (textIn.indexOf("&agrave;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&agrave;")) + "à" + textIn.substring(textIn.indexOf("&agrave;") + 8);
+  }
 
   //fractional 1/2
   while (textIn.indexOf("&frac12;") != -1) {
@@ -1626,6 +1767,11 @@ function handleSpecialCharacters(textIn) {
   //A circumflex
   while (textIn.indexOf("&Acirc;") != -1) {
     textIn = textIn.substring(0, textIn.indexOf("&Acirc;")) + "Â" + textIn.substring(textIn.indexOf("&Acirc;") + 7);
+  }
+
+  //A grave
+  while (textIn.indexOf("&Agrave;") != -1) {
+    textIn = textIn.substring(0, textIn.indexOf("&Agrave;")) + "À" + textIn.substring(textIn.indexOf("&Agrave;") + 8);
   }
 
   //U umlauts
@@ -1732,7 +1878,11 @@ function loadMatter() {
   makerMatter = [];
   backMatter = [];
   for (var i = 0; i < FRONTLENGTH; i++) {
-    var toPush = (loadImage('InsertedCopy\\FrontMatter_' + (i + 1) + '.svg'));
+    if (i == FRONTLENGTH - 1) {
+      var toPush = "";
+    } else {
+      var toPush = (loadImage('InsertedCopy\\FrontMatter_' + (i + 1) + '.svg'));
+    }
     frontMatter.push(toPush);
   }
   console.log(frontMatter);
@@ -1960,7 +2110,23 @@ function makeCheckbox(label, whichType) {
   newCheckboxDiv.appendChild(newCheckboxLabel);
 
   //emplaces reference to div with checkbox and text into fifth place of pageIncluded array
-  pageIncluded[printIndex].push(newCheckboxDiv);
+  pageIncluded[printIndex][4] = newCheckboxDiv;
+    //add winery name for maker matter
+    if (label.includes("MakerMatter")) {  
+      //takes pageList title, cuts down to winemaker name, and replaces underscores with spaces
+      pageIncluded[printIndex][5] = label.substring(label.indexOf("_") + 1, label.length - 4).replace(/_/g, " ");
+    }
+    //add winery name for tech sheets
+    if (label.includes(": 20") || label.includes("(NA)")) {
+      wineLabel = makerName(label.substring(label.indexOf(":") + 2));
+      if (wineLabel.includes(pageIncluded[printIndex - 1][5])) {
+        wineLabel = pageIncluded[printIndex - 1][5];
+      } else {
+        console.log("ERROR: skipped majer page");
+      }
+      pageIncluded[printIndex][5] = wineLabel;
+    }
+
 }
 
 
@@ -2062,6 +2228,17 @@ function changeAllChecked(e) {
   });
 }
 
+
+
+//searches wineryRegions table for the region associated with a given winery
+function getWineryRegion(wineryName) {
+  for (var i = 0; i < wineryRegions.length; i++) {
+    if (wineryName == wineryRegions[i][0]) {
+      return wineryRegions[i][1];
+    }
+  }
+  return "";
+}
 
 
 //creates blocking program delay (unused)
