@@ -9,3 +9,5 @@ Divs don't size correctly on chrome
 
 Urgent:
 REMOVE CANVAS FROM canvas_shell -- resize the two in tandem, rather than childing the canvas to it
+
+consider moving from p5pdf.js to jsPDF (pathway for single pages is save canvas as image, load as p5image, make b&w, save as pdf, for full catalog is save canvas as image, save image as pdf)

@@ -275,6 +275,8 @@ async function fetchWines(url = "") {
     },
   });
   const parsedJSON = await response.json();
+  //console.log("SEARCH: ");
+  //console.log(parsedJSON);
   const newCursor = await parsedJSON.cursor;
   const products = await parsedJSON.products;
   return [products, newCursor]; //returns array of products as well as ending cursor value (essentially, next page index)
@@ -291,6 +293,7 @@ function populateWineList() {
       //check if still in stock
       let hasInventory = false;
       for (var i = 0; i < item.variants.length; i++) {
+        //print(item);
         if (item.variants[i].inventory[0].availableForSaleCount > 0) {
           hasInventory = true;
         }
@@ -476,122 +479,129 @@ function draw() {
 
   }
   //console.log(state);
-  if (state == States.SETUP) { 
-    readGenerationSettings();
-  }
-  
-  //compiles all initial pages
-  if (state == States.COMPILING) {
-    /*if (printIndex >= 4) {
-      wineIndex = pricedWineList.length;
-      backIndex = backMatter.length - 1;
-    } //DEBUGGING*/
-    //draws all but last page
-    //if (drawing && printIndex < definitiveLength - 1 && !allDone) {
-    let whichType = -1;
-    //front matter
-    if (printIndex < frontMatter.length) {
-      //drawFrontMatter();
-      whichType = 1;
-      
-      //maker matter
-    } else if (printIndex == 2) { 
-      //noLoop(); 
-    } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
-      //drawMakerMatter();
-      whichType = 2;
-        
-      //back matter
-    } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
-      //drawGeneralBackMatter();
-      whichType = 3;
-        
-      //tech sheets
-    } else if (wineIndex < pricedWineList.length) {
-      //drawTechSheets();
-      whichType = 4;
-      
-      //last back matter
-    } else if (wineIndex == pricedWineList.length && backIndex == backMatter.length - 1) {
-      whichType = 5;
-    }
+  switch (state) {
     
-    compilePage(whichType); 
-    //CODE: this is a patch fix for the compilation UX--take the time to edit page renderers to only write to page during assembly
-    clear();
-    background(C7Gray);
-    push();
+    case States.SETUP:  
+      readGenerationSettings();
+      break;
+    
+
+    //compiles all initial pages
+    case States.COMPILING:
+      /*if (printIndex >= 4) {
+        wineIndex = pricedWineList.length;
+        backIndex = backMatter.length - 1;
+      } //DEBUGGING*/
+      //draws all but last page
+      //if (drawing && printIndex < definitiveLength - 1 && !allDone) {
+      let whichType = -1;
+      //front matter
+      if (printIndex < frontMatter.length) {
+        //drawFrontMatter();
+        whichType = 1;
+        
+        //maker matter
+      } else if (printIndex == 2) { 
+        //noLoop(); 
+      } /*comment out here */else if (pricedWineList[wineIndex] != undefined && lastMaker != undefined && justMakerName(pricedWineList[wineIndex][0]) != lastMaker) {
+        //drawMakerMatter();
+        whichType = 2;
+          
+        //back matter
+      } else if (wineIndex == pricedWineList.length && backIndex < backMatter.length - 1) {
+        //drawGeneralBackMatter();
+        whichType = 3;
+          
+        //tech sheets
+      } else if (wineIndex < pricedWineList.length) {
+        //drawTechSheets();
+        whichType = 4;
+        
+        //last back matter
+      } else if (wineIndex == pricedWineList.length && backIndex == backMatter.length - 1) {
+        whichType = 5;
+      }
+      
+      compilePage(whichType); 
+      //CODE: this is a patch fix for the compilation UX--take the time to edit page renderers to only write to page during assembly
+      clear();
+      background(C7Gray);
+      push();
+        fill('#ED225D');
+        textSize(30);
+        textAlign(CENTER);
+        noStroke();
+        textFont(regFont);
+        text("Wait for compilation", width * 0.5, height * 0.4);
+      pop();
+  
+      if (whichType != 5) {
+        printIndex++;
+      }
+      break;
+  
+
+    case States.PREVIEWING:
+      previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+      break;
+  
+
+    case States.ASSEMBLING:
+      if (frameRate() > 1) {
+        console.log("slowdown");
+        //frameRate(.5);
+      }
+      if (lastToPrint == -1) {
+        reStart();
+      }
+      //skips to next page to be printed
+      while (!pageIncluded[viewingPageNum - 1][0] && viewingPageNum <= lastToPrint) {
+        viewingPageNum++;
+        if (viewingPageNum >= (lastToPrint + 1)) {
+          break;
+        }
+        console.log(viewingPageNum + " " + (lastToPrint + 1));
+      } 
+      if (viewingPageNum < (lastToPrint + 1)) {
+        printedPages++;
+        previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+        viewingPageNum++;
+        pdf.nextPage();
+        //pdf is done
+      } else {
+        printedPages++;
+        previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
+        console.log("exit draw to print");
+        /*
+        for(var i = 0; i < 10000; i++) {
+          console.log();
+        }*/
+        //printPDF();
+        setTimeout(function() {
+          printPDF();
+        }, 500);
+        noLoop();
+        /*
+        sleep(501);*/
+      }
+      break;
+  
+
+    case States.SETUP:
+      //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
+  
       fill('#ED225D');
       textSize(30);
       textAlign(CENTER);
-      noStroke();
-      textFont(regFont);
-      text("Wait for compilation", width * 0.5, height * 0.4);
-    pop();
+      push();
+        noStroke();
+        textFont(regFont);
+        text("Press the button to continue", width * 0.5, height * 0.4);
+      pop();
+      break;
 
-    if (whichType != 5) {
-      printIndex++;
+
     }
-  }
-
-  if (state == States.PREVIEWING) {
-    previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
-  }
-
-  if (state == States.ASSEMBLING) {
-    if (frameRate() > 1) {
-      console.log("slowdown");
-      //frameRate(.5);
-    }
-    if (lastToPrint == -1) {
-      reStart();
-    }
-    //skips to next page to be printed
-    while (!pageIncluded[viewingPageNum - 1][0] && viewingPageNum <= lastToPrint) {
-      viewingPageNum++;
-      if (viewingPageNum >= (lastToPrint + 1)) {
-        break;
-      }
-      console.log(viewingPageNum + " " + (lastToPrint + 1));
-    } 
-    if (viewingPageNum < (lastToPrint + 1)) {
-      printedPages++;
-      previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
-      viewingPageNum++;
-      pdf.nextPage();
-      //pdf is done
-    } else {
-      printedPages++;
-      previewPage(viewingPageNum, pageIncluded[viewingPageNum - 1][1], pageIncluded[viewingPageNum - 1][2]);
-      console.log("exit draw to print");
-      /*
-      for(var i = 0; i < 10000; i++) {
-        console.log();
-      }*/
-      //printPDF();
-      setTimeout(function() {
-        printPDF();
-      }, 500);
-      noLoop();
-      /*
-      sleep(501);*/
-    }
-
-  }
-
-  if (state == States.SETUP) {
-    //document.getElementById('canvas_shell').style = "width: " + (document.getElementById("defaultCanvas").getBoundingClientRect().width + 1) + "px; height: " + (document.getElementById("defaultCanvas").getBoundingClientRect().height + 1) + "px; border: 1px solid white; float: left;";
-
-    fill('#ED225D');
-    textSize(30);
-    textAlign(CENTER);
-    push();
-      noStroke();
-      textFont(regFont);
-      text("Press the button to continue", width * 0.5, height * 0.4);
-    pop();
-
-  }
 }
 
 
