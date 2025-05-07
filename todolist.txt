@@ -6,8 +6,10 @@ Integrate iFrameResizer.js to fix in-C7 presentation
 Bugs:
 "Save as PDF" cuts pages weird
 Divs don't size correctly on chrome
+NOT FOUND being prepended inaccurately
 
 Urgent:
 REMOVE CANVAS FROM canvas_shell -- resize the two in tandem, rather than childing the canvas to it
 
 consider moving from p5pdf.js to jsPDF (pathway for single pages is save canvas as image, load as p5image, make b&w, save as pdf, for full catalog is save canvas as image, save image as pdf)
+add checkbox option for wines only (on all edit checks, if toggle is On it won't allow if label includes "InsertedCopy". Will turn off all such rows when toggled on.)

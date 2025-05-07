@@ -130,7 +130,8 @@ const States = {
   SETUP: 0,
   COMPILING: 1,
   PREVIEWING: 2,
-  ASSEMBLING: 3
+  ASSEMBLING: 3,
+  ASSEMBLING_SINGLE: 4
 };
 var state = 0;
 
@@ -537,6 +538,10 @@ function draw() {
   
       if (whichType != 5) {
         printIndex++;
+      } else {
+        //turn off looping for preview (performance improvement)
+        noLoop();
+        redraw();
       }
       break;
   
@@ -1231,6 +1236,7 @@ function filterPrices() {
 //sets off assembly loop
 function preparePDF() {
   state = States.ASSEMBLING;
+  loop();
   var previewControls = document.getElementById('preview_controls');
   previewControls.style.display = "none";
   document.getElementById('page_list').style.display = "none";
@@ -1999,6 +2005,7 @@ function viewPreviousPage() {
     viewingPageNum = definitiveLength;
   }
   pageIn.value = viewingPageNum;
+  redraw();
 }
 
 
@@ -2012,6 +2019,7 @@ function viewNextPage() {
     viewingPageNum = 1;
   }
   pageIn.value = viewingPageNum;
+  redraw();
 }
 
 
@@ -2029,7 +2037,7 @@ function jumpToPageView() {
   pageIn.value = input;
   viewingPageNum = input
   //console.log("jumping to page " + viewingPageNum + " via input " + input);
-
+  redraw();
 }
 
 
@@ -2048,7 +2056,7 @@ function jumpToPageView() {
 function makeCheckbox(label, whichType) {
   //var pageList = document.getElementById("page_list");
 
-  //create "Select All" checkbox
+  //create "Select All", "Wines Only" checkboxes
   if (!pageList.hasChildNodes()) {
     //container for select all
     var selectAllDiv = document.createElement("div");
@@ -2060,15 +2068,30 @@ function makeCheckbox(label, whichType) {
     selectAllCheckbox.type = "checkbox";
     selectAllCheckbox.id = "selectAllCheckbox";
     selectAllCheckbox.name = "selectAllCheckbox";
-    selectAllCheckbox.checked = true
+    selectAllCheckbox.checked = true;
     selectAllCheckbox.addEventListener('click', changeAllChecked);
     selectAllDiv.appendChild(selectAllCheckbox);
 
     //label for select all
     var selectAllLabel = document.createElement("label");
     selectAllLabel.htmlFor = "selectAllCheckbox";
-    selectAllLabel.innerHTML = "Select All";
+    selectAllLabel.innerHTML = "Select All  ";
     selectAllDiv.appendChild(selectAllLabel);
+
+    //checkbox for wines only
+    var winesOnlyCheckbox = document.createElement("input");
+    winesOnlyCheckbox.type = "checkbox";
+    winesOnlyCheckbox.id = "winesOnlyCheckbox";
+    winesOnlyCheckbox.name = "winesOnlyCheckbox";
+    winesOnlyCheckbox.checked = false;
+    winesOnlyCheckbox.addEventListener('click', changeWinesOnlyChecked);
+    selectAllDiv.appendChild(winesOnlyCheckbox);
+
+    //label for wines only
+    var winesOnlyLabel = document.createElement("label");
+    winesOnlyLabel.htmlFor = "winesOnlyCheckbox";
+    winesOnlyLabel.innerHTML = "Wines Only";
+    selectAllDiv.appendChild(winesOnlyLabel);
   }
 
   //container for page selector
@@ -2094,12 +2117,12 @@ function makeCheckbox(label, whichType) {
     newSectionalCheckbox.addEventListener('click', changeSectionalChecked);
     newCheckboxDiv.appendChild(newSectionalCheckbox);
   } else {
-    //spacer div for current page if not section header
+    /*//spacer div for current page if not section header
     var newSpacerDiv = document.createElement("div");
         newSpacerDiv.id = "initialPage" + (printIndex + 1) + "Spacer";
         newSpacerDiv.class = "checkboxSpacer";
         //newSpacerDiv.style = "width: 20px; height: 13px; display: inline-block;";
-        newCheckboxDiv.appendChild(newSpacerDiv);
+        newCheckboxDiv.appendChild(newSpacerDiv);*/
   }
 
   //checkbox for current page
@@ -2147,46 +2170,75 @@ function changeSingleChecked(e) {
   var targetName = target.name;
   var targetIndex = targetName.match(/\d+/)[0] - 1;
   //console.log(targetName + " at index " + targetIndex + " checked status: " + target.checked);
-  //match appropriate page inclusion to checkbox status
-  pageIncluded[targetIndex][0] = target.checked;
+  
+  //deselect sectional checkbox if it's selected and this box has been deselected 
+  if (!target.checked) {
+    var targetType = pageIncluded[targetIndex][1];
+    var sectionalBox;
+    //identify correct sectional checkbox
+    switch (targetType) {
+      //front matter sectional checkbox
+      case 1:
+        sectionalBox = document.getElementById("initialPage1SectionalCheckbox");
+        break;
 
-  //deselect sectional checkbox if it's selected and this box has been deselected
-  var targetType = pageIncluded[targetIndex][1];
-  var sectionalBox;
-  //front matter sectional checkbox
-  if (targetType == 1) {
-    sectionalBox = document.getElementById("initialPage1SectionalCheckbox");
-    //back matter sectional checkbox
-  } else if (targetType == 3 || targetType == 5) {
-    var tempInd = targetIndex;
-    while (pageIncluded[tempInd - 1][1] != 4) {
-      tempInd--;
-    }
-    //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
-    var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
-    sectionalBox = document.getElementById(nameString);
-    //console.log(sectionalBox);
-    //maker matter sectional checkbox
-  } else if (targetType == 2 || targetType == 4) {
-    var tempInd = targetIndex;
-    while (!(pageIncluded[tempInd - 1][1] == 4 && pageIncluded[tempInd][1] == 2) && pageIncluded[tempInd - 1][1] != 1) {
-      tempInd--;
-    }
-    //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
-    var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
-    sectionalBox = document.getElementById(nameString);
-    //console.log(sectionalBox);
+      //back matter sectional checkbox
+      case 3:
+      case 5:
+        var tempInd = targetIndex;
+        while (pageIncluded[tempInd - 1][1] != 4) {
+          tempInd--;
+        }
+        //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
+        var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
+        sectionalBox = document.getElementById(nameString);
+        //console.log(sectionalBox);
+        break;
 
+      //maker matter sectional checkbox
+      case 2:
+      case 4:
+        var tempInd = targetIndex;
+        while (!(pageIncluded[tempInd - 1][1] == 4 && pageIncluded[tempInd][1] == 2) && pageIncluded[tempInd - 1][1] != 1) {
+          tempInd--;
+        }
+        //console.log("initialPage" + (tempInd + 1) + "SectionalCheckbox");
+        var nameString = "initialPage" + (tempInd + 1) + "SectionalCheckbox";
+        sectionalBox = document.getElementById(nameString);
+        //console.log(sectionalBox);
+        break;
+
+      default:
+        print("Erroneous targetType in changeSingleChecked");
+        break;
+    }
+    //write state to sectional checkbox
+    if (sectionalBox.checked) {
+      sectionalBox.checked = false;
+    }
+  } else {
+    //block selecting this box if it's a nonwine and Wines Only
+    var winesOnlyCheckbox = document.getElementById("winesOnlyCheckbox");
+    if (winesOnlyCheckbox.checked) {
+      //console.log(input.parentElement.id);
+      var selfAndSiblings = target.parentElement.childNodes;
+      //turn off checkbox if row label names inserted matter
+      if (selfAndSiblings[selfAndSiblings.length - 1].textContent.includes("Matter")) { 
+        target.checked = false;
+        return;
+      }
+    }
   }
-  if (sectionalBox.checked && !target.checked) {
-    sectionalBox.checked = false;
-  }
+
   
   //deselect "Select All" box if it's selected and this box has been deselected
   var selectAll = document.getElementById("selectAllCheckbox");
   if (selectAll.checked && !target.checked) {
     selectAll.checked = false;
   }
+  
+  //match appropriate page inclusion to checkbox status
+  pageIncluded[targetIndex][0] = target.checked;
 }
 
 
@@ -2198,6 +2250,13 @@ function changeSectionalChecked(e) {
   var targetIndex = targetName.match(/\d+/)[0] - 1;
   var targetStatus = target.checked;
 
+  //block enabling this section if Wines Only is on
+  var winesOnlyCheckbox = document.getElementById("winesOnlyCheckbox");
+  if (winesOnlyCheckbox.checked) {
+    target.checked = false;
+    pageIncluded[targetIndex][0] = false;
+    return;
+  }
   //deselect all checkboxes in section
   document.getElementById("initialPage" + (targetIndex + 1) + "Checkbox").checked = targetStatus;
   pageIncluded[targetIndex][0] = target.checked;
@@ -2223,19 +2282,61 @@ function changeSectionalChecked(e) {
   }
 }
 
+
+
 //toggles all checkboxes
 function changeAllChecked(e) {
-  var target = e.currentTarget;
+  var target = document.getElementById("selectAllCheckbox");
   var targetName = target.name;
+  var winesOnlyCheckbox = document.getElementById("winesOnlyCheckbox");
 
   var allBoxes = document.querySelectorAll('input');
   allBoxes.forEach((input) => {
     if (input.type == "checkbox" && input.name.substring(0, 11) == "initialPage") {
       //console.log(input.name);
+      if (winesOnlyCheckbox.checked) {
+        //console.log(input.parentElement.id);
+        var selfAndSiblings = input.parentElement.childNodes;
+        //turn off checkbox if row label names inserted matter
+        if (selfAndSiblings[selfAndSiblings.length - 1].textContent.includes("Matter")) { 
+          input.checked = false;
+          pageIncluded[input.name.match(/\d+/)[0] - 1][0] = false;
+          return;
+        }
+      }
       input.checked = target.checked;
       pageIncluded[input.name.match(/\d+/)[0] - 1][0] = target.checked;
     }
   });
+}
+
+
+
+//toggles off all nonwine pages when on, does nothing when off
+function changeWinesOnlyChecked(e) {
+  var target = e.currentTarget;
+  var targetName = target.name;
+
+  if (document.getElementById("selectAllCheckbox").checked) {
+    changeAllChecked(e);
+  } else if (target.checked) {
+    var allBoxes = document.querySelectorAll('input');
+    allBoxes.forEach((input) => {
+      if (input.type == "checkbox" && input.name.substring(0, 11) == "initialPage") {
+        //console.log(input.name);
+        if (target.checked) { //checks if winesOnlyCheckbox is on
+          //console.log(input.parentElement.id);
+          var selfAndSiblings = input.parentElement.childNodes;
+          //turn off checkbox if row label names inserted matter
+          if (selfAndSiblings[selfAndSiblings.length - 1].textContent.includes("Matter")) { 
+            input.checked = false;
+            pageIncluded[input.name.match(/\d+/)[0] - 1][0] = false;
+            return;
+          }
+        }
+      }
+    }); 
+  }
 }
 
 
@@ -2260,23 +2361,6 @@ function sleep(milliseconds) {
     currentDate = Date.now();
   } while (currentDate - date < milliseconds);
 }
-
-/*
-
-Four modes:
-
-Name             | Toggle Price  | Associated Graphic Object(s)                  | Included Modes                 | Included Pages (For combos, higher amount dominates)
-Print Overlays   | N             | footerGraphic (includes maker page headers)   | Self                           | All
-Product Pages    | Y             | productGraphic                                | Self                           | Product Pages
-Print-Ready Kit  | Y             | footerGraphic, productGraphic                 | Print Overlays, Product Pages  | All
-Full Catalog     | Y             | footerGraphic, productGraphic, insertGraphic  | Self, Print-Ready Kit          | All
-
-Any mode with price toggled on will also include priceGraphic
-
-user selection will use a Radio DOM object for mode, and a checkbox DOM object for price toggle
-
-*/
-
 
 //Fix margins on table of contents page, as well as upper vertical line in inksaver mode
 
