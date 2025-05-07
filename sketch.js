@@ -19,30 +19,33 @@ let allInsertOverlays = [];
 let contents = [];
 
 let wineryRegions = [
+  ["Adank", "Graubünden, Switzerland"],
   ["Archetyp", "Steiermark, Austria"],
   ["Cave de l'Orlaya", "Valais, Switzerland"],
   ["Cave Mandolé", "Valais, Switzerland"],
   ["Cellier de la Baraterie", "Savoie, France"],
   ["Domaine Céline Jacquet", "Savoie, France"],
-  ["Eichenstein", "Südtirol / Alto Adige, ltaly"],
+  ["Eichenstein", "Alto Adige / Südtirol, ltaly"],
   ["Fischer", "Steiermark / Styria, Austria"],
   ["Frauwallner", "Steiermark / Styria, Austria"],
   ["GraWü", "Trentino-Alto Adige, Austria"],
   ["Gump Hof", "Südtirol / Alto Adige, Italy"],
-  ["Hofkellerei of the Prince of Liechtenstein", "Vaduz, Liechtenstein"],
+  ["Prince of Liechtenstein", "Vaduz, Liechtenstein"],
   ["Hofstätter", "Tramin / Alto Adige, ltaly"],
   ["Kegley & Lexer", "Kärnten / Carinthia, Austria"],
   ["Kobler", "Südtirol / Alto Adige, Italy"],
-  ["Kränzelhof", "Südtirol / Alto Adige, ltaly"],
+  ["Kränzelhof", "Alto Adige / Südtirol, ltaly"],
   ["Lackner-Tinnacher", "Steiermark / Styria, Austria"],
-  ["Marinushof", "Südtirol / Alto Adige, ltaly"],
+  ["Marinushof", "Alto Adige / Südtirol, ltaly"],
   ["Mayer am Pfarrplatz", "Vienna, Austria"],
   ["Muster Gamlitz", "Steiermark / Styria, Austria"],
+  ["Pfannenstielhof", "Alto Adige / Südtirol, ltaly"],
   ["Pfitscher", "Südtirol / Alto Adige, Italy"],
   ["Pianta Grossa", "Valle d'Aosta, Italy"],
   ["Steinbock", "Mosel, Germany"],
   ["Sternberg", "Kärnten / Carinthia, Austria"],
   ["Stroblhof", "Südtirol / Alto Adige, Italy"],
+  ["Taubenschuss", "Weinviertel, Austria"],
   ["Thomas Dorfmann", "Südtirol / Alto Adige, Italy"],
   ["Vignali Varàs", "Trentino, Italy"],
   ["Vinodea", "Kremstal, Austria"],
@@ -386,6 +389,7 @@ function justMakerName(wineIn) {
   let bottleName;
   
   bottleName = wineName(wineIn);
+  //console.log("MakeName: " + makeName + " BottleName: " + bottleName);
   let result =  makeName.substring(0, makeName.length - bottleName.length - 1);
   //if (!makers.includes(result)) { makers.push(result); console.log("hi"); } else { console.log("bye"); }
   return result;
@@ -400,8 +404,15 @@ function wineName(wine) {
   if (wine.vendor != null) {
     makerNameSpace = wine.vendor.title.length;
   } else return name;
-  if (wine.vendor.title == "Vinodea / Andrea Schenter") {
-    makerNameSpace = 7;
+
+  //handle special cases of naming/branding
+  switch (wine.vendor.title) {
+    case "Vinodea / Andrea Schenter":
+      makerNameSpace = 7;
+      break;
+    case "Hofkellerei":
+      makerNameSpace = 23;
+      break;
   }
   return name.substring(makerNameSpace + 1);
 
@@ -659,9 +670,9 @@ function compilePage(whichType) {
     case 4:
       let str4 = drawTechSheets();
       let title = pricedWineList[wineIndex - 1][0].title;
-      if (title.substring(5, 11) == "Hofkel") {
+      /*if (title.substring(5, 11) == "Hofkel") { //hofkellerei has been rebranded to Prince of Liechtenstein
         title = title.substring(0, 5) + "Hofkellerei" + title.substring(47);
-      }
+      }*/
       makeCheckbox("&nbsp;" + str4 + "Page " + (printIndex + 1) + ": " + title, 4);
       break;
 
@@ -801,6 +812,7 @@ function drawTableOfContents() {
       }
       //wineries/tech sheets
       else if (i >= FRONTLENGTH && thisWinery != pageIncluded[i - 1][5] && thisWinery != null) {
+        console.log("ToC " + thisWinery); //looks like this code not hit?
         if (thisWinery == "Fischer Weingut") {
           thisWinery = "Fischer";
         } else if (thisWinery == "Hofkellerei") {
@@ -1235,8 +1247,8 @@ function filterPrices() {
 
 //sets off assembly loop
 function preparePDF() {
+  loop(); //for some reason, this needs to be above the Assembly state set or else printing will break, idk why
   state = States.ASSEMBLING;
-  loop();
   var previewControls = document.getElementById('preview_controls');
   previewControls.style.display = "none";
   document.getElementById('page_list').style.display = "none";
@@ -1325,9 +1337,9 @@ function header(thisWine) {
   if (thisVintage == null) { thisVintage = ""; }
   text(thisVintage, 62, 84);
   let title = makerName(thisWine[0].title);
-  if (title.substring(0, 6) == "Hofkel") {
+  /*if (title.substring(0, 6) == "Hofkel") { // hofkellerei has asked to be rebranded to Price of Liechtenstein
     title = "Hofkellerei" + title.substring(42);
-  }
+  }*/
   text(title, 62, 135);
   textFont(italFont, 20);
   text(thisWine[0].subTitle, 62, 175);
@@ -1945,12 +1957,13 @@ function makerMatterFailed() {
 
 //Gets list of all makers in the catalogue
 function getMakers() {
-  for (const i of pricedWineList) {
+  for (const wine of pricedWineList) {
     //console.log(justMakerName(i[0]));
-    if (!makers.includes(justMakerName(i[0]))) { makers.push(justMakerName(i[0])); }
+    if (!makers.includes(justMakerName(wine[0]))) { makers.push(justMakerName(wine[0])); }
   }
   for (var i = 0; i < makers.length; i++) {
     while(makers[i].indexOf(" ") != -1) {
+      //print("Formatting maker name " + makers[i]);
       makers[i] = makers[i].substring(0, makers[i].indexOf(" ")) + "_" + makers[i].substring(makers[i].indexOf(" ") + 1);
     }
   }
@@ -2144,21 +2157,27 @@ function makeCheckbox(label, whichType) {
 
   //emplaces reference to div with checkbox and text into fifth place of pageIncluded array
   pageIncluded[printIndex][4] = newCheckboxDiv;
-    //add winery name for maker matter
-    if (label.includes("MakerMatter")) {  
-      //takes pageList title, cuts down to winemaker name, and replaces underscores with spaces
-      pageIncluded[printIndex][5] = label.substring(label.indexOf("_") + 1, label.length - 4).replace(/_/g, " ");
+
+  //add winery name for maker matter
+  if (label.includes("MakerMatter")) {  
+    //takes pageList title, cuts down to winemaker name, and replaces underscores with spaces
+    pageIncluded[printIndex][5] = label.substring(label.indexOf("_") + 1, label.length - 4).replace(/_/g, " ");
+  }
+  //add winery name for tech sheets
+  console.log(label);
+  if (label.includes(": 20") || label.includes("(NA)") || label.includes("Brut")) {
+    wineLabel = makerName(label.substring(label.indexOf(":") + 2));
+    console.log("Initial wine label: " + wineLabel);
+    if (wineLabel.includes(pageIncluded[printIndex - 1][5])) {
+      wineLabel = pageIncluded[printIndex - 1][5];
+      console.log("Processed wine label: " + wineLabel);
+    } else {
+      console.log("Prior wine name: " + pageIncluded[printIndex - 1][5]);
+      console.log(pageIncluded[printIndex - 1]);
+      console.log("ERROR: skipped major page");
     }
-    //add winery name for tech sheets
-    if (label.includes(": 20") || label.includes("(NA)")) {
-      wineLabel = makerName(label.substring(label.indexOf(":") + 2));
-      if (wineLabel.includes(pageIncluded[printIndex - 1][5])) {
-        wineLabel = pageIncluded[printIndex - 1][5];
-      } else {
-        console.log("ERROR: skipped majer page");
-      }
-      pageIncluded[printIndex][5] = wineLabel;
-    }
+    pageIncluded[printIndex][5] = wineLabel;
+  }
 
 }
 
@@ -2348,7 +2367,7 @@ function getWineryRegion(wineryName) {
       return wineryRegions[i][1];
     }
   }
-  return "";
+  return "ERROR: REGION NOT FOUND";
 }
 
 
