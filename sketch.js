@@ -634,16 +634,22 @@ function draw() {
 function compilePage(whichType) {
   if (state == States.COMPILING) {
     var specialInd = -1;
-    if (whichType == 4) {
-      console.log("winDex " + wineIndex);
-      specialInd = wineIndex;
-    } else if (whichType == 2) {
-      specialInd = makerIndex;
-    } else if (whichType == 3 || whichType == 5) {
-      specialInd = backIndex;
+    switch (whichType) {
+      case 4:
+        console.log("winDex " + wineIndex);
+        specialInd = wineIndex;
+        break;
+
+      case 2:
+        specialInd = makerIndex;
+        break;
+
+      case 3:
+      case 5:
+        specialInd = backIndex;
+        break;
     }
     pageIncluded.push([true, whichType, specialInd, -1, null, null]);
-
   }
 
   if (yesPrices) {
@@ -707,33 +713,35 @@ function compilePage(whichType) {
 function previewPage(thisPageNum, whichType, specialInd) {
   //console.log("previewing page " + thisPageNum + " of type " + whichType + " and specialInd " + specialInd);
   printIndex = thisPageNum - 1;
-  if (whichType == 4) {
-    wineIndex = specialInd;
-  } else if (whichType == 2) {
-    makerIndex = specialInd;
-    wineIndex = pageIncluded[printIndex + 1][2];
-  } else if (whichType == 3 || whichType == 5) {
-    backIndex = specialInd;
-  }
   switch (whichType) {
     case 1:
       drawFrontMatter();
       break;
 
     case 2:
+      makerIndex = specialInd;
+      wineIndex = pageIncluded[printIndex + 1][2];
       drawMakerMatter();
+      makerIndex = 0;
+      wineIndex = 0;
       break;
 
     case 3:
+      backIndex = specialInd;
       drawGeneralBackMatter();
+      backIndex = 0;
       break;
       
     case 4:
+      wineIndex = specialInd;
       drawTechSheets();
+      wineIndex = 0;
       break;
 
     case 5:
+      backIndex = specialInd;
       drawLastBackMatter();
+      backIndex = 0;
       break;
 
     default:
@@ -741,14 +749,14 @@ function previewPage(thisPageNum, whichType, specialInd) {
 
   }
   printIndex = 0;
-  if (whichType == 4) {
+  /*if (whichType == 4) {
     wineIndex = 0;
   } else if (whichType == 2) {
     makerIndex = 0;
     wineIndex = 0;
   } else if (whichType == 3 || whichType == 5) {
     backIndex = 0;
-  }
+  }*/
 }
 
 
