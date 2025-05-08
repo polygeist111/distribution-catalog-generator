@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-  <body style="background-color:#222a30;">
   <head>
-    <title>Tech Sheet Generator</title> <!--google quickstart-->
-    <meta charset="utf-8" />
+    <title>Tech Sheet Generator</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 
     <!--<link rel="stylesheet" type="text/css" href="libraries/rainbow.css">/!-->
@@ -26,7 +25,7 @@
         obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
         }
     </script>-->
-    <script type="text/javascript" src="https://dev-center.platform.commerce7.com/v2/commerce7.js"></script>
+    <script src="https://dev-center.platform.commerce7.com/v2/commerce7.js"></script>
     
     <script src="sketch.js"></script>
   </head>
@@ -67,12 +66,12 @@
                       
                       <!--Ink Saver-->
                       <div>
-                        <input type="checkbox" name="saveInk" id="saveInk" checked/>
+                        <input type="checkbox" name="saveInk" id="saveInk" checked>
                         <label for="saveInk">Save Ink?</label>
                       </div>
                       <!--Price inclusion-->
                       <div>
-                        <input type="checkbox" name="priceIncluded" id="priceIncluded"/>
+                        <input type="checkbox" name="priceIncluded" id="priceIncluded">
                         <label for="priceIncluded">Include Price?</label>
                       </div>
         
@@ -86,7 +85,7 @@
             <div id="preview_controls"> 
               <pre></pre>
               <button id="viewPrev" class="previewButton" onclick="viewPreviousPage()">Previous</button> 
-              <input type="number" id="pageNumIn" onchange="jumpToPageView()" placeholder="e.g. 32" min="1"/>
+              <input type="number" id="pageNumIn" onchange="jumpToPageView()" placeholder="e.g. 32" min="1">
               <button id="viewNext" class="previewButton" onclick="viewNextPage()">Next</button> 
             </div>
           </div>
@@ -117,22 +116,6 @@
         <br>
         <span id="credits">Originally created by Tucker Wood for Archetyp Alpine Wines</span>-->
       </div>
-
-      
-
-    <!--<script src="index.js"></script>
-    <pre id="content" style="white-space: pre-wrap;"></pre>
-    <script src="googleAuth.js"></script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>-->
-    <!--
-    <label for="file-upload" class="ms-Button ms-Button--primary">
-      <span class="ms-Button-label">LIST FILES IN DIR</span>
-      <span class="ms-Button-description">List Files In Directory</span>
-    </label>
-    <input id="file-upload" type="file" webkitdirectory="" directory="" hidden />
-    -->
   </div>
   </body>
-  <!--google quickstart-->
 </html>
